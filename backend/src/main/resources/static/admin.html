@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-brandy-50 dark:bg-brandy-900">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | BNQ Accesorios</title>
+  <link href="output.css" rel="stylesheet">
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Menú superior -->
+  <header class="fixed top-0 left-0 w-full bg-brandy-50 dark:bg-brandy-900 shadow z-50">
+    <nav class="container mx-auto flex items-center justify-between py-3 px-4">
+      <div class="flex items-center gap-2">
+        <img src="/img/logo.png" alt="BNQ Accesorios Logo" class="h-10 w-10">
+        <span class="text-brandy-700 dark:text-brandy-100 font-bold text-xl tracking-widest">BNQ ACCESORIOS</span>
+      </div>
+      <div class="hidden md:flex gap-8 items-center">
+        <a href="index.html" class="hover:text-brandy-500 transition">Inicio</a>
+        <a href="catalogo.html" class="hover:text-brandy-500 transition">Catálogo</a>
+        <a href="cuenta.html" class="hover:text-brandy-500 transition">Mi cuenta</a>
+        <a href="sobre.html" class="hover:text-brandy-500 transition">Sobre nosotros</a>
+        <button id="dark-toggle" class="ml-4 p-2 rounded hover:bg-brandy-100 dark:hover:bg-brandy-800 transition">🌙</button>
+        <a href="#" id="carrito-btn" class="ml-2 relative">
+          🛒<span class="absolute -top-2 -right-2 bg-brandy-500 text-white text-xs rounded-full px-1">0</span>
+        </a>
+      </div>
+      <!-- Hamburguesa -->
+      <button id="menu-toggle" class="md:hidden p-2 rounded hover:bg-brandy-100 dark:hover:bg-brandy-800 transition">
+        <span class="block w-6 h-0.5 bg-brandy-700 mb-1"></span>
+        <span class="block w-6 h-0.5 bg-brandy-700 mb-1"></span>
+        <span class="block w-6 h-0.5 bg-brandy-700"></span>
+      </button>
+    </nav>
+    <!-- Menú móvil -->
+    <div id="mobile-menu" class="hidden md:hidden bg-brandy-50 dark:bg-brandy-900 px-4 pb-4">
+      <a href="index.html" class="block py-2">Inicio</a>
+      <a href="catalogo.html" class="block py-2">Catálogo</a>
+      <a href="cuenta.html" class="block py-2">Mi cuenta</a>
+      <a href="sobre.html" class="block py-2">Sobre nosotros</a>
+      <a href="#" id="carrito-btn-mobile" class="block py-2">🛒 Carrito</a>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="flex-1 flex flex-col items-center justify-center pt-32 pb-12 w-full">
+    <h1 class="text-4xl md:text-5xl font-bold text-brandy-700 dark:text-brandy-100 mb-4 tracking-widest">Panel de administración</h1>
+    <div class="bg-white dark:bg-brandy-800 rounded-lg shadow p-8 w-full max-w-2xl flex flex-col gap-6">
+      <section>
+        <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2">Gestión de productos</h2>
+        <button class="bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition mb-2">Agregar producto</button>
+        <ul class="list-disc pl-6 text-brandy-800 dark:text-brandy-200">
+          <li>Pulsera artesanal <span class="text-xs text-brandy-500">(Editar | Eliminar)</span></li>
+          <li>Collar boho <span class="text-xs text-brandy-500">(Editar | Eliminar)</span></li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2">Gestión de categorías</h2>
+        <button class="bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition mb-2">Agregar categoría</button>
+        <ul class="list-disc pl-6 text-brandy-800 dark:text-brandy-200">
+          <li>Bisutería <span class="text-xs text-brandy-500">(Editar | Eliminar)</span></li>
+          <li>Minimalista <span class="text-xs text-brandy-500">(Editar | Eliminar)</span></li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2">Pedidos recientes</h2>
+        <ul class="list-disc pl-6 text-brandy-800 dark:text-brandy-200">
+          <li>#001 - Juan Pérez - $150</li>
+          <li>#002 - Ana López - $220</li>
+        </ul>
+      </section>
+    <p class="text-lg text-brandy-800 dark:text-brandy-200 mb-8 text-center max-w-xl">Aquí podrás gestionar productos, categorías y pedidos. Próximamente disponible.</p>
+    <!-- Aquí irá el panel de administración -->
+  </main>
+
+  <footer class="text-center py-4 text-brandy-600 dark:text-brandy-200 text-sm bg-brandy-50 dark:bg-brandy-900 border-t border-brandy-100 dark:border-brandy-800">
+    © 2024 BNQ Accesorios. Todos los derechos reservados.
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
