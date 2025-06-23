@@ -19,6 +19,11 @@
         <a href="catalogo.html" class="hover:text-brandy-500 transition">Catálogo</a>
         <a href="cuenta.html" class="hover:text-brandy-500 transition font-bold underline">Mi cuenta</a>
         <a href="sobre.html" class="hover:text-brandy-500 transition">Sobre nosotros</a>
+        <div class="flex items-center gap-4">
+          <a href="admin.html" class="admin-link hidden hover:text-brandy-500 transition">Admin</a>
+          <span id="user-info" class="hidden text-brandy-700 dark:text-brandy-100 font-semibold"></span>
+          <button id="logout-btn" class="hidden ml-2 px-3 py-1 rounded bg-brandy-200 dark:bg-brandy-700 text-brandy-700 dark:text-brandy-100 hover:bg-brandy-300 dark:hover:bg-brandy-800 transition text-sm">Cerrar sesión</button>
+        </div>
         <button id="dark-toggle" class="ml-4 p-2 rounded hover:bg-brandy-100 dark:hover:bg-brandy-800 transition">🌙</button>
         <a href="#" id="carrito-btn" class="ml-2 relative">
           🛒<span class="absolute -top-2 -right-2 bg-brandy-500 text-white text-xs rounded-full px-1">0</span>
@@ -37,6 +42,7 @@
       <a href="catalogo.html" class="block py-2">Catálogo</a>
       <a href="cuenta.html" class="block py-2 font-bold underline">Mi cuenta</a>
       <a href="sobre.html" class="block py-2">Sobre nosotros</a>
+      <a href="admin.html" class="block py-2">Admin</a>
       <a href="#" id="carrito-btn-mobile" class="block py-2">🛒 Carrito</a>
     </div>
   </header>
@@ -45,20 +51,23 @@
   <main class="flex-1 flex flex-col items-center justify-center pt-32 pb-12">
     <h1 class="text-4xl md:text-5xl font-bold text-brandy-700 dark:text-brandy-100 mb-4 tracking-widest">Mi cuenta</h1>
     <div class="bg-white dark:bg-brandy-800 rounded-lg shadow p-8 w-full max-w-md">
+      <div id="message" class="mb-4 text-center text-sm"></div>
       <form id="login-form" class="flex flex-col gap-4">
         <h2 class="text-2xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2">Iniciar sesión</h2>
-        <input type="email" placeholder="Correo electrónico" class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
-        <input type="password" placeholder="Contraseña" class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
+        <input id="login-email" type="email" placeholder="Correo electrónico" required class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
+        <input id="login-password" type="password" placeholder="Contraseña" required class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
         <button type="submit" class="bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition">Entrar</button>
+        <p class="text-center text-brandy-700 dark:text-brandy-200 text-sm">¿No tienes cuenta? <a href="#" id="show-register" class="text-brandy-500 hover:underline">Regístrate</a></p>
       </form>
-      <div class="my-6 border-t border-brandy-200 dark:border-brandy-700"></div>
-      <form id="register-form" class="flex flex-col gap-4">
+      <form id="register-form" class="flex flex-col gap-4 hidden">
         <h2 class="text-2xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2">Registrarse</h2>
-        <input type="text" placeholder="Nombre completo" class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
-        <input type="email" placeholder="Correo electrónico" class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
-        <input type="password" placeholder="Contraseña" class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
+        <input id="register-name" type="text" placeholder="Nombre completo" required class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
+        <input id="register-email" type="email" placeholder="Correo electrónico" required class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
+        <input id="register-password" type="password" placeholder="Contraseña" required class="p-3 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500">
         <button type="submit" class="bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition">Crear cuenta</button>
+        <p class="text-center text-brandy-700 dark:text-brandy-200 text-sm">¿Ya tienes cuenta? <a href="#" id="show-login" class="text-brandy-500 hover:underline">Inicia sesión</a></p>
       </form>
+    </div>
     <p class="text-lg text-brandy-800 dark:text-brandy-200 mb-8 text-center max-w-xl">Aquí podrás iniciar sesión, registrarte y ver tus pedidos. Próximamente disponible.</p>
     <!-- Aquí irá el formulario de login/registro y datos de usuario -->
   </main>
@@ -67,6 +76,6 @@
     © 2024 BNQ Accesorios. Todos los derechos reservados.
   </footer>
 
-  <script src="/js/main.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
