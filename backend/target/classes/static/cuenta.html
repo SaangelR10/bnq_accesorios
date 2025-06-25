@@ -14,16 +14,14 @@
         <img src="/img/logo.png" alt="BNQ Accesorios Logo" class="h-10 w-10">
         <span class="text-brandy-700 dark:text-brandy-100 font-bold text-xl tracking-widest">BNQ ACCESORIOS</span>
       </div>
-      <div class="hidden md:flex gap-8 items-center">
+      <div class="hidden md:flex gap-8 items-center" id="main-menu">
         <a href="index.html" class="hover:text-brandy-500 transition">Inicio</a>
         <a href="catalogo.html" class="hover:text-brandy-500 transition">Catálogo</a>
-        <a href="cuenta.html" class="hover:text-brandy-500 transition font-bold underline">Mi cuenta</a>
+        <a href="cuenta.html" class="cuenta-link hover:text-brandy-500 transition font-bold underline">Mi cuenta</a>
         <a href="sobre.html" class="hover:text-brandy-500 transition">Sobre nosotros</a>
-        <div class="flex items-center gap-4">
-          <a href="admin.html" class="admin-link hidden hover:text-brandy-500 transition">Admin</a>
-          <span id="user-info" class="hidden text-brandy-700 dark:text-brandy-100 font-semibold"></span>
-          <button id="logout-btn" class="hidden ml-2 px-3 py-1 rounded bg-brandy-200 dark:bg-brandy-700 text-brandy-700 dark:text-brandy-100 hover:bg-brandy-300 dark:hover:bg-brandy-800 transition text-sm">Cerrar sesión</button>
-        </div>
+        <a href="admin.html" class="admin-link hidden hover:text-brandy-500 transition">Admin</a>
+        <span id="user-info" class="hidden text-brandy-700 dark:text-brandy-100 font-semibold"></span>
+        <button id="logout-btn" class="hidden ml-2 px-3 py-1 rounded bg-brandy-200 dark:bg-brandy-700 text-brandy-700 dark:text-brandy-100 hover:bg-brandy-300 dark:hover:bg-brandy-800 transition text-sm">Cerrar sesión</button>
         <button id="dark-toggle" class="ml-4 p-2 rounded hover:bg-brandy-100 dark:hover:bg-brandy-800 transition">🌙</button>
         <a href="#" id="carrito-btn" class="ml-2 relative">
           🛒<span class="absolute -top-2 -right-2 bg-brandy-500 text-white text-xs rounded-full px-1">0</span>
@@ -40,9 +38,11 @@
     <div id="mobile-menu" class="hidden md:hidden bg-brandy-50 dark:bg-brandy-900 px-4 pb-4">
       <a href="index.html" class="block py-2">Inicio</a>
       <a href="catalogo.html" class="block py-2">Catálogo</a>
-      <a href="cuenta.html" class="block py-2 font-bold underline">Mi cuenta</a>
+      <a href="cuenta.html" class="cuenta-link block py-2 font-bold underline">Mi cuenta</a>
       <a href="sobre.html" class="block py-2">Sobre nosotros</a>
-      <a href="admin.html" class="block py-2">Admin</a>
+      <a href="admin.html" class="admin-link hidden block py-2">Admin</a>
+      <span id="user-info-mobile" class="hidden block py-2 text-brandy-700 dark:text-brandy-100 font-semibold"></span>
+      <button id="logout-btn-mobile" class="hidden block w-full text-left px-4 py-2 rounded bg-brandy-200 dark:bg-brandy-700 text-brandy-700 dark:text-brandy-100 hover:bg-brandy-300 dark:hover:bg-brandy-800 transition text-sm">Cerrar sesión</button>
       <a href="#" id="carrito-btn-mobile" class="block py-2">🛒 Carrito</a>
     </div>
   </header>

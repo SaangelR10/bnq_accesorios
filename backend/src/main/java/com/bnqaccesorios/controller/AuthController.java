@@ -1,7 +1,9 @@
 package com.bnqaccesorios.controller;
 
-import com.bnqaccesorios.service.AuthService;
+import com.bnqaccesorios.model.Usuario;
+import com.bnqaccesorios.model.Rol;
 import com.bnqaccesorios.repository.UsuarioRepository;
+import com.bnqaccesorios.service.AuthService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
