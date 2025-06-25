@@ -2,7 +2,7 @@ package com.bnqaccesorios.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "imagenes_producto")
@@ -19,6 +19,6 @@ public class ImagenProducto {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id")
-    @JsonBackReference
+    @JsonIgnoreProperties("imagenes")
     private Producto producto;
 } 

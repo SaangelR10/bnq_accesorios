@@ -30,36 +30,62 @@ public class ProductoService {
     private final String uploadDir = "uploads/imagenes_productos/";
 
     public List<Producto> listarPublicos() {
-        return productoRepository.findAll().stream()
-                .filter(Producto::getActivo)
-                .toList();
+        return productoRepository.findAllActivosWithCategoria();
     }
 
     public Optional<Producto> obtenerPorId(Long id) {
-        return productoRepository.findById(id).filter(Producto::getActivo);
+        return productoRepository.findByIdWithCategoria(id).filter(Producto::getActivo);
     }
 
     public List<Producto> listarAdmin() {
-        return productoRepository.findAll();
+        System.out.println("=== SERVICIO: LISTAR ADMIN ===");
+        List<Producto> productos = productoRepository.findAllWithCategoria();
+        System.out.println("Productos encontrados: " + productos.size());
+        
+        for (Producto p : productos) {
+            System.out.println("Producto: " + p.getNombre() + " - Categoría: " + 
+                (p.getCategoria() != null ? p.getCategoria().getNombre() + " (ID: " + p.getCategoria().getId() + ")" : "null"));
+        }
+        
+        return productos;
     }
 
     @Transactional
     public Producto crearProducto(Producto producto, Long categoriaId, List<MultipartFile> imagenes) throws IOException {
+        System.out.println("=== SERVICIO: CREAR PRODUCTO ===");
+        System.out.println("Categoría ID recibido: " + categoriaId);
+        
         Categoria categoria = categoriaRepository.findById(categoriaId)
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+        System.out.println("Categoría encontrada: " + categoria.getNombre() + " (ID: " + categoria.getId() + ")");
+        
         producto.setCategoria(categoria);
         producto.setActivo(true);
         Producto guardado = productoRepository.save(producto);
+        System.out.println("Producto guardado con categoría: " + (guardado.getCategoria() != null ? guardado.getCategoria().getNombre() : "null"));
+        
+        if (imagenes == null) {
+            imagenes = new ArrayList<>();
+        }
         guardarImagenes(guardado, imagenes);
         return guardado;
     }
 
     @Transactional
     public Producto editarProducto(Long id, Producto datos, Long categoriaId, List<MultipartFile> nuevasImagenes) throws IOException {
+        System.out.println("=== SERVICIO: EDITAR PRODUCTO ===");
+        System.out.println("ID del producto: " + id);
+        System.out.println("Categoría ID recibido: " + categoriaId);
+        
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        System.out.println("Producto encontrado: " + producto.getNombre());
+        System.out.println("Categoría actual: " + (producto.getCategoria() != null ? producto.getCategoria().getNombre() : "null"));
+        
         Categoria categoria = categoriaRepository.findById(categoriaId)
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+        System.out.println("Nueva categoría encontrada: " + categoria.getNombre() + " (ID: " + categoria.getId() + ")");
+        
         producto.setNombre(datos.getNombre());
         producto.setPrecio(datos.getPrecio());
         producto.setDescripcion(datos.getDescripcion());
@@ -67,11 +93,17 @@ public class ProductoService {
         producto.setStock(datos.getStock());
         producto.setCategoria(categoria);
         producto.setActivo(datos.getActivo());
-        productoRepository.save(producto);
-        if (nuevasImagenes != null && !nuevasImagenes.isEmpty()) {
+        
+        Producto guardado = productoRepository.save(producto);
+        System.out.println("Producto actualizado con categoría: " + (guardado.getCategoria() != null ? guardado.getCategoria().getNombre() : "null"));
+        
+        if (nuevasImagenes == null) {
+            nuevasImagenes = new ArrayList<>();
+        }
+        if (!nuevasImagenes.isEmpty()) {
             guardarImagenes(producto, nuevasImagenes);
         }
-        return producto;
+        return guardado;
     }
 
     @Transactional

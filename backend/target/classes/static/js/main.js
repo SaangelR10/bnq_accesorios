@@ -163,14 +163,16 @@ document.addEventListener('DOMContentLoaded', function () {
         logoutBtn.classList.remove('hidden');
         logoutBtn.onclick = () => {
           localStorage.removeItem('jwt');
-          window.location.reload();
+          localStorage.removeItem('carrito');
+          window.location.href = 'index.html';
         };
       }
       if (logoutBtnMobile) {
         logoutBtnMobile.classList.remove('hidden');
         logoutBtnMobile.onclick = () => {
           localStorage.removeItem('jwt');
-          window.location.reload();
+          localStorage.removeItem('carrito');
+          window.location.href = 'index.html';
         };
       }
       // Mostrar admin solo si es admin
@@ -227,7 +229,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
           <h2 class="text-3xl font-bold text-brandy-700 dark:text-brandy-100 mb-2">${producto.nombre}</h2>
           <p class="text-brandy-600 dark:text-brandy-200 mb-2">${producto.descripcion}</p>
           <div class="flex gap-4 mb-2">
-            <span class="text-brandy-500 font-bold text-2xl">$${producto.precio}</span>
+            <span class="text-brandy-500 font-bold text-2xl">${formatoCOP(producto.precio)}</span>
             <span class="text-sm text-brandy-400 dark:text-brandy-300">Stock: ${producto.stock}</span>
           </div>
           <div class="mb-2 text-brandy-500 dark:text-brandy-200 text-sm">Materiales: ${producto.materiales || ''}</div>
@@ -304,7 +306,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     if (!carritoItems) return;
     if (!carrito.length) {
       carritoItems.innerHTML = '<div class="text-center text-brandy-400 dark:text-brandy-300">Tu carrito está vacío.</div>';
-      if (carritoTotal) carritoTotal.textContent = '$0';
+      if (carritoTotal) carritoTotal.textContent = formatoCOP(0);
       if (window.actualizarContadorCarrito) window.actualizarContadorCarrito();
       return;
     }
@@ -313,13 +315,13 @@ if (window.location.pathname.endsWith('catalogo.html')) {
         <img src="${item.imagen}" alt="${item.nombre}" class="h-20 w-20 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700">
         <div class="flex-1 flex flex-col gap-1">
           <span class="font-semibold text-brandy-700 dark:text-brandy-100 text-lg">${item.nombre}</span>
-          <span class="text-brandy-500 dark:text-brandy-200 text-sm">$${item.precio} x </span>
+          <span class="text-brandy-500 dark:text-brandy-200 text-sm">${formatoCOP(item.precio)} x </span>
           <div class="flex items-center gap-2 mt-1">
             <input type="number" min="1" max="${item.stock}" value="${item.cantidad}" data-id="${item.id}" class="w-16 p-2 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500 cantidad-carrito">
             <button class="text-red-500 hover:text-red-700 transition eliminar-carrito" data-id="${item.id}" title="Eliminar"><span class="material-icons">delete</span></button>
           </div>
         </div>
-        <div class="font-bold text-brandy-700 dark:text-brandy-100 text-lg">$${item.precio * item.cantidad}</div>
+        <div class="font-bold text-brandy-700 dark:text-brandy-100 text-lg">${formatoCOP(item.precio * item.cantidad)}</div>
       </div>
     `).join('');
     carritoItems.querySelectorAll('.cantidad-carrito').forEach(input => {
@@ -345,17 +347,17 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       };
     });
     let total = carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-    if (carritoTotal) carritoTotal.textContent = `$${total}`;
+    if (carritoTotal) carritoTotal.textContent = formatoCOP(total);
     if (window.actualizarContadorCarrito) window.actualizarContadorCarrito();
   }
   if (finalizarCompra) finalizarCompra.onclick = () => {
     if (!carrito.length) return;
     let mensaje = '¡Hola! Quiero hacer un pedido:%0A';
     carrito.forEach(item => {
-      mensaje += `- ${item.nombre} x${item.cantidad} ($${item.precio * item.cantidad})%0A`;
+      mensaje += `- ${item.nombre} x${item.cantidad} (${formatoCOP(item.precio * item.cantidad)})%0A`;
     });
-    mensaje += `%0ATotal: $${carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0)}`;
-    window.open(`https://wa.me/573001112233?text=${mensaje}`, '_blank');
+    mensaje += `%0ATotal: ${formatoCOP(carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
+    window.open(`https://wa.me/573001112233?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
   // Click en cualquier parte del producto para ver detalles
@@ -421,7 +423,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
           <img src="${img}" alt="${p.nombre}" class="h-40 w-40 object-cover rounded mb-4">
           <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2">${p.nombre}</h2>
           <p class="text-brandy-600 dark:text-brandy-200 mb-2">${p.descripcion}</p>
-          <span class="text-brandy-500 font-bold text-lg mb-4">$${p.precio}</span>
+          <span class="text-brandy-500 font-bold text-lg mb-4">${formatoCOP(p.precio)}</span>
           <button class="bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition ver-detalle" data-id="${p.id}">Ver detalles</button>
         </div>
       `;
@@ -467,7 +469,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     if (!carritoItems) return;
     if (!carrito.length) {
       carritoItems.innerHTML = '<div class="text-center text-brandy-400 dark:text-brandy-300">Tu carrito está vacío.</div>';
-      if (carritoTotal) carritoTotal.textContent = '$0';
+      if (carritoTotal) carritoTotal.textContent = formatoCOP(0);
       actualizarContadorCarrito();
       return;
     }
@@ -476,13 +478,13 @@ if (window.location.pathname.endsWith('catalogo.html')) {
         <img src="${item.imagen}" alt="${item.nombre}" class="h-20 w-20 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700">
         <div class="flex-1 flex flex-col gap-1">
           <span class="font-semibold text-brandy-700 dark:text-brandy-100 text-lg">${item.nombre}</span>
-          <span class="text-brandy-500 dark:text-brandy-200 text-sm">$${item.precio} x </span>
+          <span class="text-brandy-500 dark:text-brandy-200 text-sm">${formatoCOP(item.precio)} x </span>
           <div class="flex items-center gap-2 mt-1">
             <input type="number" min="1" max="${item.stock}" value="${item.cantidad}" data-id="${item.id}" class="w-16 p-2 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500 cantidad-carrito">
             <button class="text-red-500 hover:text-red-700 transition eliminar-carrito" data-id="${item.id}" title="Eliminar"><span class="material-icons">delete</span></button>
           </div>
         </div>
-        <div class="font-bold text-brandy-700 dark:text-brandy-100 text-lg">$${item.precio * item.cantidad}</div>
+        <div class="font-bold text-brandy-700 dark:text-brandy-100 text-lg">${formatoCOP(item.precio * item.cantidad)}</div>
       </div>
     `).join('');
     carritoItems.querySelectorAll('.cantidad-carrito').forEach(input => {
@@ -508,7 +510,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       };
     });
     let total = carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-    if (carritoTotal) carritoTotal.textContent = `$${total}`;
+    if (carritoTotal) carritoTotal.textContent = formatoCOP(total);
     actualizarContadorCarrito();
   }
 
@@ -536,9 +538,9 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     if (!carrito.length) return;
     let mensaje = '¡Hola! Quiero hacer un pedido:%0A';
     carrito.forEach(item => {
-      mensaje += `- ${item.nombre} x${item.cantidad} ($${item.precio * item.cantidad})%0A`;
+      mensaje += `- ${item.nombre} x${item.cantidad} (${formatoCOP(item.precio * item.cantidad)})%0A`;
     });
-    mensaje += `%0ATotal: $${carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0)}`;
+    mensaje += `%0ATotal: ${formatoCOP(carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
     // Redirigir correctamente a WhatsApp
     window.open(`https://wa.me/573001112233?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
@@ -576,6 +578,17 @@ if (window.location.pathname.endsWith('admin.html')) {
   const cargarMasivoBtn = document.getElementById('cargar-masivo');
   const descargarPlantilla = document.getElementById('descargar-plantilla');
   const masivoMsg = document.getElementById('masivo-msg');
+
+  // --- Variables para las nuevas funcionalidades ---
+  const categoriasContainer = document.getElementById('categorias-container');
+  const vistaTarjetasBtn = document.getElementById('vista-tarjetas');
+  const vistaTablaBtn = document.getElementById('vista-tabla');
+  const vistaTarjetasContainer = document.getElementById('vista-tarjetas-container');
+  const vistaTablaContainer = document.getElementById('vista-tabla-container');
+  const tablaProductos = document.getElementById('tabla-productos');
+  const modalEditarCategoria = document.getElementById('modal-editar-categoria');
+  const formEditarCategoria = document.getElementById('form-editar-categoria');
+  const cancelarEditarCategoria = document.getElementById('cancelar-editar-categoria');
 
   // --- 1. Drag & drop y previsualización de imágenes ---
   let imagenesSeleccionadas = [];
@@ -616,6 +629,20 @@ if (window.location.pathname.endsWith('admin.html')) {
   });
   inputImagenes.addEventListener('change', e => {
     imagenesSeleccionadas = [...e.target.files];
+    // Validación de tamaño máximo (50MB por archivo)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    let error = false;
+    imagenesSeleccionadas.forEach(img => {
+      if (img.size > maxSize) error = true;
+    });
+    if (error) {
+      msgDiv.textContent = 'Alguna imagen supera el tamaño máximo permitido (50MB).';
+      msgDiv.className = 'text-red-600 dark:text-red-400';
+      imagenesSeleccionadas = [];
+      inputImagenes.value = '';
+      mostrarPreview([]);
+      return;
+    }
     mostrarPreview(imagenesSeleccionadas);
   });
 
@@ -641,7 +668,9 @@ if (window.location.pathname.endsWith('admin.html')) {
     const formData = new FormData();
     formData.append('producto', JSON.stringify(producto));
     formData.append('categoriaId', categoriaId);
-    imagenesSeleccionadas.forEach(img => formData.append('imagenes', img));
+    if (imagenesSeleccionadas.length > 0) {
+      imagenesSeleccionadas.forEach(img => formData.append('imagenes', img));
+    }
     // DEBUG: Mostrar el contenido real del FormData antes de enviar
     for (let pair of formData.entries()) {
       console.log('FormData', pair[0], pair[1]);
@@ -658,7 +687,12 @@ if (window.location.pathname.endsWith('admin.html')) {
       form.reset();
       imagenesSeleccionadas = [];
       mostrarPreview([]);
-      cargarProductos();
+      
+      // Recargar todo automáticamente
+      await cargarProductos();
+      if (vistaTablaContainer && !vistaTablaContainer.classList.contains('hidden')) {
+        await cargarProductosTabla();
+      }
     } catch (err) {
       msgDiv.textContent = err.message || 'Error al guardar producto';
       msgDiv.className = 'text-red-600 dark:text-red-400';
@@ -674,46 +708,350 @@ if (window.location.pathname.endsWith('admin.html')) {
   // --- 3. Carga masiva de productos ---
   descargarPlantilla.addEventListener('click', e => {
     e.preventDefault();
-    // Descarga plantilla CSV simple
-    const csv = 'nombre,precio,stock,descripcion,materiales,categoria\n';
-    const blob = new Blob([csv], { type: 'text/csv' });
+    // Crear plantilla Excel simple solo con encabezados
+    const datos = [
+      ['nombre', 'precio', 'stock', 'descripcion', 'materiales', 'categoria']
+    ];
+    
+    // Crear CSV con los datos
+    const csv = datos.map(fila => fila.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'plantilla_productos.csv';
+    a.download = 'plantilla_productos_bnq.csv';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    // Mostrar mensaje informativo
+    masivoMsg.textContent = 'Plantilla descargada. Completa los datos y súbela para cargar productos masivamente.';
+    masivoMsg.className = 'text-green-600 dark:text-green-400';
   });
+
+  // Variables para la carga masiva
+  let productosMasivos = [];
+  let modalMasivo = null;
+
   cargarMasivoBtn.addEventListener('click', async () => {
     if (!archivoMasivo.files.length) {
       masivoMsg.textContent = 'Selecciona un archivo primero.';
       masivoMsg.className = 'text-red-600 dark:text-red-400';
       return;
     }
-    masivoMsg.textContent = 'Cargando productos...';
+    
+    masivoMsg.textContent = 'Procesando archivo...';
     masivoMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+    
     const formData = new FormData();
     formData.append('archivo', archivoMasivo.files[0]);
+    
     try {
       const res = await fetch(`${API_URL}/productos/masivo`, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + jwt },
         body: formData
       });
-      if (!res.ok) throw new Error('Error al cargar archivo');
-      masivoMsg.textContent = '¡Productos cargados!';
-      masivoMsg.className = 'text-green-600 dark:text-green-400 animate-bounce';
-      archivoMasivo.value = '';
-      cargarProductos();
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
+      
+      productosMasivos = await res.json();
+      
+      if (productosMasivos.length === 0) {
+        masivoMsg.textContent = 'No se encontraron productos válidos en el archivo.';
+        masivoMsg.className = 'text-red-600 dark:text-red-400';
+        return;
+      }
+      
+      // Mostrar modal de previsualización
+      mostrarModalMasivo();
+      
     } catch (err) {
-      masivoMsg.textContent = err.message || 'Error al cargar archivo';
+      masivoMsg.textContent = err.message || 'Error al procesar archivo';
       masivoMsg.className = 'text-red-600 dark:text-red-400';
     }
   });
 
-  // --- 4. Renderizado y edición inline de productos ---
+  function mostrarModalMasivo() {
+    // Crear modal si no existe
+    if (!modalMasivo) {
+      modalMasivo = document.createElement('div');
+      modalMasivo.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+      modalMasivo.innerHTML = `
+        <div class="bg-white dark:bg-brandy-900 rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+          <div class="flex justify-between items-center p-6 border-b border-brandy-200 dark:border-brandy-700">
+            <h2 class="text-2xl font-bold text-brandy-700 dark:text-brandy-100">
+              Previsualización de Productos (${productosMasivos.length} productos)
+            </h2>
+            <button id="cerrar-modal-masivo" class="text-brandy-500 hover:text-brandy-700 dark:text-brandy-400 dark:hover:text-brandy-200 text-2xl">
+              ×
+            </button>
+          </div>
+          
+          <div class="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+            <div class="grid gap-6" id="productos-masivos-container">
+              ${productosMasivos.map((producto, index) => renderProductoMasivo(producto, index)).join('')}
+            </div>
+          </div>
+          
+          <div class="flex justify-between items-center p-6 border-t border-brandy-200 dark:border-brandy-700">
+            <button id="cancelar-masivo" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
+              Cancelar
+            </button>
+            <div class="flex gap-4">
+              <span class="text-sm text-brandy-600 dark:text-brandy-300">
+                Productos a cargar: <span id="contador-productos">${productosMasivos.length}</span>
+              </span>
+              <button id="confirmar-masivo" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                Confirmar Carga (${productosMasivos.length} productos)
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modalMasivo);
+      
+      // Eventos del modal
+      document.getElementById('cerrar-modal-masivo').onclick = cerrarModalMasivo;
+      document.getElementById('cancelar-masivo').onclick = cerrarModalMasivo;
+      document.getElementById('confirmar-masivo').onclick = confirmarCargaMasiva;
+    }
+  }
+
+  function renderProductoMasivo(producto, index) {
+    return `
+      <div class="bg-brandy-50 dark:bg-brandy-800 rounded-lg p-6 border border-brandy-200 dark:border-brandy-700" data-index="${index}">
+        <div class="flex justify-between items-start mb-4">
+          <h3 class="text-lg font-semibold text-brandy-700 dark:text-brandy-100">
+            Producto ${index + 1}
+          </h3>
+          <button class="text-red-500 hover:text-red-700 transition eliminar-producto-masivo" data-index="${index}" title="Eliminar producto">
+            🗑️
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-brandy-600 dark:text-brandy-300 mb-1">Nombre</label>
+              <input type="text" class="w-full p-2 border border-brandy-300 dark:border-brandy-600 rounded bg-white dark:bg-brandy-900 text-brandy-700 dark:text-brandy-100" 
+                     value="${producto.nombre}" data-field="nombre" data-index="${index}">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-brandy-600 dark:text-brandy-300 mb-1">Precio (COP)</label>
+              <input type="number" class="w-full p-2 border border-brandy-300 dark:border-brandy-600 rounded bg-white dark:bg-brandy-900 text-brandy-700 dark:text-brandy-100" 
+                     value="${producto.precio}" data-field="precio" data-index="${index}">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-brandy-600 dark:text-brandy-300 mb-1">Stock</label>
+              <input type="number" class="w-full p-2 border border-brandy-300 dark:border-brandy-600 rounded bg-white dark:bg-brandy-900 text-brandy-700 dark:text-brandy-100" 
+                     value="${producto.stock}" data-field="stock" data-index="${index}">
+            </div>
+          </div>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-brandy-600 dark:text-brandy-300 mb-1">Categoría</label>
+              <input type="text" class="w-full p-2 border border-brandy-300 dark:border-brandy-600 rounded bg-white dark:bg-brandy-900 text-brandy-700 dark:text-brandy-100" 
+                     value="${producto.categoria}" data-field="categoria" data-index="${index}">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-brandy-600 dark:text-brandy-300 mb-1">Materiales</label>
+              <input type="text" class="w-full p-2 border border-brandy-300 dark:border-brandy-600 rounded bg-white dark:bg-brandy-900 text-brandy-700 dark:text-brandy-100" 
+                     value="${producto.materiales}" data-field="materiales" data-index="${index}">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-brandy-600 dark:text-brandy-300 mb-1">Descripción</label>
+              <textarea class="w-full p-2 border border-brandy-300 dark:border-brandy-600 rounded bg-white dark:bg-brandy-900 text-brandy-700 dark:text-brandy-100" 
+                        rows="2" data-field="descripcion" data-index="${index}">${producto.descripcion}</textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-brandy-600 dark:text-brandy-300 mb-2">Imágenes del producto</label>
+          <div class="border-2 border-dashed border-brandy-300 dark:border-brandy-600 rounded-lg p-4 text-center drop-area-masivo" data-index="${index}">
+            <div class="text-brandy-500 dark:text-brandy-400">
+              <p class="mb-2">Arrastra imágenes aquí o haz clic para seleccionar</p>
+              <p class="text-sm">Formatos: JPG, PNG, GIF (máx. 50MB por imagen)</p>
+            </div>
+            <input type="file" class="hidden input-imagenes-masivo" multiple accept="image/*" data-index="${index}">
+          </div>
+          <div class="flex flex-wrap gap-2 mt-2 preview-imagenes-masivo" data-index="${index}"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function cerrarModalMasivo() {
+    if (modalMasivo) {
+      modalMasivo.remove();
+      modalMasivo = null;
+      productosMasivos = [];
+      archivoMasivo.value = '';
+      masivoMsg.textContent = '';
+    }
+  }
+
+  async function confirmarCargaMasiva() {
+    const btnConfirmar = document.getElementById('confirmar-masivo');
+    btnConfirmar.textContent = 'Guardando productos...';
+    btnConfirmar.disabled = true;
+    
+    try {
+      // Recopilar datos actualizados de los productos
+      const productosActualizados = productosMasivos.map((producto, index) => {
+        const container = document.querySelector(`[data-index="${index}"]`);
+        if (!container) return producto;
+        
+        return {
+          nombre: container.querySelector('[data-field="nombre"]').value,
+          precio: parseFloat(container.querySelector('[data-field="precio"]').value),
+          stock: parseInt(container.querySelector('[data-field="stock"]').value),
+          descripcion: container.querySelector('[data-field="descripcion"]').value,
+          materiales: container.querySelector('[data-field="materiales"]').value,
+          categoria: container.querySelector('[data-field="categoria"]').value
+        };
+      });
+      
+      const res = await fetch(`${API_URL}/productos/masivo/confirmar`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': 'Bearer ' + jwt,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productosActualizados)
+      });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
+      
+      const productosGuardados = await res.json();
+      
+      // Mostrar mensaje de éxito
+      masivoMsg.textContent = `¡${productosGuardados.length} productos cargados exitosamente!`;
+      masivoMsg.className = 'text-green-600 dark:text-green-400 animate-bounce';
+      
+      // Cerrar modal y limpiar
+      cerrarModalMasivo();
+      archivoMasivo.value = '';
+      
+      // Recargar productos
+      await cargarProductos();
+      if (vistaTablaContainer && !vistaTablaContainer.classList.contains('hidden')) {
+        await cargarProductosTabla();
+      }
+      
+    } catch (err) {
+      masivoMsg.textContent = err.message || 'Error al guardar productos';
+      masivoMsg.className = 'text-red-600 dark:text-red-400';
+      btnConfirmar.textContent = `Confirmar Carga (${productosMasivos.length} productos)`;
+      btnConfirmar.disabled = false;
+    }
+  }
+
+  // Eventos delegados para el modal masivo
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('eliminar-producto-masivo')) {
+      const index = parseInt(e.target.dataset.index);
+      if (confirm('¿Eliminar este producto de la carga?')) {
+        productosMasivos.splice(index, 1);
+        actualizarModalMasivo();
+      }
+    }
+  });
+
+  document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('input-imagenes-masivo')) {
+      const index = parseInt(e.target.dataset.index);
+      const files = Array.from(e.target.files);
+      mostrarPreviewImagenesMasivo(files, index);
+    }
+  });
+
+  document.addEventListener('dragover', function(e) {
+    if (e.target.classList.contains('drop-area-masivo')) {
+      e.preventDefault();
+      e.target.classList.add('border-brandy-500', 'bg-brandy-100');
+    }
+  });
+
+  document.addEventListener('dragleave', function(e) {
+    if (e.target.classList.contains('drop-area-masivo')) {
+      e.preventDefault();
+      e.target.classList.remove('border-brandy-500', 'bg-brandy-100');
+    }
+  });
+
+  document.addEventListener('drop', function(e) {
+    if (e.target.classList.contains('drop-area-masivo')) {
+      e.preventDefault();
+      e.target.classList.remove('border-brandy-500', 'bg-brandy-100');
+      const index = parseInt(e.target.dataset.index);
+      const files = Array.from(e.dataTransfer.files);
+      mostrarPreviewImagenesMasivo(files, index);
+    }
+  });
+
+  function mostrarPreviewImagenesMasivo(files, index) {
+    const preview = document.querySelector(`.preview-imagenes-masivo[data-index="${index}"]`);
+    if (!preview) return;
+    
+    files.forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const div = document.createElement('div');
+          div.className = 'relative';
+          div.innerHTML = `
+            <img src="${e.target.result}" class="h-16 w-16 object-cover rounded border border-brandy-200 dark:border-brandy-700">
+            <button class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs hover:bg-red-700">×</button>
+          `;
+          div.querySelector('button').onclick = () => div.remove();
+          preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  function actualizarModalMasivo() {
+    if (!modalMasivo) return;
+    
+    const container = document.getElementById('productos-masivos-container');
+    const contador = document.getElementById('contador-productos');
+    const btnConfirmar = document.getElementById('confirmar-masivo');
+    
+    container.innerHTML = productosMasivos.map((producto, index) => renderProductoMasivo(producto, index)).join('');
+    contador.textContent = productosMasivos.length;
+    btnConfirmar.textContent = `Confirmar Carga (${productosMasivos.length} productos)`;
+    
+    if (productosMasivos.length === 0) {
+      cerrarModalMasivo();
+    }
+    
+    // Agregar eventos a las nuevas áreas de drop
+    container.querySelectorAll('.drop-area-masivo').forEach(area => {
+      area.addEventListener('click', () => {
+        const index = parseInt(area.dataset.index);
+        const input = document.querySelector(`.input-imagenes-masivo[data-index="${index}"]`);
+        if (input) input.click();
+      });
+    });
+  }
+
+  // --- 4. Cargar categorías y productos existentes ---
   async function cargarCategorias() {
     try {
       const res = await fetch(`${API_URL}/categorias`);
@@ -726,6 +1064,7 @@ if (window.location.pathname.endsWith('admin.html')) {
       categoriaSelect.innerHTML = '<option value="">Error al cargar</option>';
     }
   }
+
   async function cargarProductos() {
     adminProductosMsg.textContent = 'Cargando productos...';
     adminProductosMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
@@ -736,21 +1075,23 @@ if (window.location.pathname.endsWith('admin.html')) {
       if (!res.ok) throw new Error('Error al cargar productos');
       const productos = await res.json();
       if (!productos.length) {
-        adminProductosContainer.innerHTML = '';
+        vistaTarjetasContainer.innerHTML = '';
         adminProductosMsg.textContent = 'No hay productos.';
         return;
       }
       adminProductosMsg.textContent = '';
-      adminProductosContainer.innerHTML = productos.map(p => renderProductoCard(p)).join('');
+      vistaTarjetasContainer.innerHTML = productos.map(p => renderProductoCard(p)).join('');
       productos.forEach(p => asignarEventosProducto(p.id));
     } catch (err) {
       adminProductosMsg.textContent = err.message || 'Error al cargar productos';
       adminProductosMsg.className = 'text-red-600 dark:text-red-400';
     }
   }
+
   function renderProductoCard(p) {
     const img = (p.imagenes && p.imagenes.length > 0) ? `/imagenes_productos/${p.imagenes[0].url}` : 'img/no-image.png';
     const cats = window._categoriasAdmin || [];
+    
     return `
       <div class="bg-white dark:bg-brandy-900 rounded-lg shadow p-6 flex flex-col gap-2 relative group transition-transform hover:scale-105 duration-200" id="prod-${p.id}">
         <img src="${img}" alt="${p.nombre}" class="h-32 w-32 object-cover rounded mb-2 mx-auto border border-brandy-200 dark:border-brandy-700">
@@ -764,7 +1105,7 @@ if (window.location.pathname.endsWith('admin.html')) {
         </div>
         <div class="flex flex-col gap-1 mb-2">
           <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="precio-${p.id}">Precio</label>
-          <input id="precio-${p.id}" type="number" class="text-lg font-semibold text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" value="${p.precio}" data-field="precio" data-id="${p.id}">
+          <input id="precio-${p.id}" type="number" step="0.01" class="text-lg font-semibold text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" value="${p.precio}" data-field="precio" data-id="${p.id}">
         </div>
         <div class="flex flex-col gap-1 mb-2">
           <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="stock-${p.id}">Stock</label>
@@ -772,52 +1113,51 @@ if (window.location.pathname.endsWith('admin.html')) {
         </div>
         <div class="flex flex-col gap-1 mb-2">
           <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="materiales-${p.id}">Materiales</label>
-          <input id="materiales-${p.id}" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" value="${p.materiales || ''}" data-field="materiales" data-id="${p.id}">
+          <input id="materiales-${p.id}" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" value="${p.materiales}" data-field="materiales" data-id="${p.id}">
         </div>
         <div class="flex flex-col gap-1 mb-2">
           <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="categoria-${p.id}">Categoría</label>
-          <select id="categoria-${p.id}" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 border border-brandy-200 dark:border-brandy-700" data-field="categoria" data-id="${p.id}">
-            <option value="">Sin categoría</option>
+          <select id="categoria-${p.id}" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" data-field="categoria" data-id="${p.id}">
             ${cats.map(c => `<option value="${c.id}" ${p.categoria && p.categoria.id === c.id ? 'selected' : ''}>${c.nombre}</option>`).join('')}
           </select>
         </div>
         <div class="flex justify-center gap-2 mt-2">
-          <button class="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-1" data-accion="guardar" data-id="${p.id}" title="Guardar cambios"><span class="material-icons">save</span></button>
-          <button class="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition flex items-center gap-1" data-accion="eliminar" data-id="${p.id}" title="Eliminar producto"><span class="material-icons">delete</span></button>
-          <button class="px-3 py-1 rounded ${p.activo ? 'bg-brandy-600' : 'bg-gray-400'} text-white hover:bg-brandy-700 transition flex items-center gap-1" data-accion="toggle-activo" data-id="${p.id}" title="${p.activo ? 'Ocultar del catálogo' : 'Mostrar en catálogo'}"><span class="material-icons">${p.activo ? 'visibility' : 'visibility_off'}</span></button>
+          <button class="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-1" data-accion="guardar" data-id="${p.id}" title="Guardar cambios">💾</button>
+          <button class="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition flex items-center gap-1" data-accion="eliminar" data-id="${p.id}" title="Eliminar producto">🗑️</button>
+          <button class="px-3 py-1 rounded ${p.activo ? 'bg-brandy-600' : 'bg-gray-400'} text-white hover:bg-brandy-700 transition flex items-center gap-1" data-accion="toggle-activo" data-id="${p.id}" title="${p.activo ? 'Ocultar del catálogo' : 'Mostrar en catálogo'}">${p.activo ? '👁️' : '🙈'}</button>
         </div>
         <div class="text-xs text-center mt-1 text-brandy-500 dark:text-brandy-200">ID: ${p.id}</div>
-        <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">${p.categoria ? p.categoria.nombre : ''}</div>
-        <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">${p.fechaCreacion ? new Date(p.fechaCreacion).toLocaleDateString() : ''}</div>
+        <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">
+          <strong>Categoría:</strong> ${p.categoria ? p.categoria.nombre : 'Sin categoría'}
+        </div>
         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" id="feedback-${p.id}"></div>
       </div>
     `;
   }
+
   function asignarEventosProducto(id) {
     const card = document.getElementById(`prod-${id}`);
     if (!card) return;
+    
     // Guardar cambios
     card.querySelector('[data-accion="guardar"]').onclick = async () => {
-      const nombre = card.querySelector('[data-field="nombre"]').value;
-      const descripcion = card.querySelector('[data-field="descripcion"]').value;
-      const precio = card.querySelector('[data-field="precio"]').value;
-      const stock = card.querySelector('[data-field="stock"]').value;
-      const materiales = card.querySelector('[data-field="materiales"]').value;
-      const categoriaId = card.querySelector('[data-field="categoria"]').value;
       const feedback = card.querySelector(`#feedback-${id}`);
-      if (!categoriaId) {
-        feedback.textContent = 'Selecciona una categoría';
-        feedback.className = 'text-red-600 dark:text-red-400';
-        return;
-      }
       feedback.textContent = 'Guardando...';
       feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+      
+      const nombre = card.querySelector('[data-field="nombre"]').value;
+      const descripcion = card.querySelector('[data-field="descripcion"]').value;
+      const precio = parseFloat(card.querySelector('[data-field="precio"]').value);
+      const stock = parseInt(card.querySelector('[data-field="stock"]').value);
+      const materiales = card.querySelector('[data-field="materiales"]').value;
+      const categoriaId = card.querySelector('[data-field="categoria"]').value;
+      
       try {
         const formData = new FormData();
         formData.append('producto', JSON.stringify({ nombre, descripcion, precio, stock, materiales }));
         formData.append('categoriaId', categoriaId);
-        const res = await fetch(`${API_URL}/admin/productos/${id}/editar`, {
-          method: 'POST',
+        const res = await fetch(`${API_URL}/admin/productos/${id}`, {
+          method: 'PUT',
           headers: { 'Authorization': 'Bearer ' + jwt },
           body: formData
         });
@@ -825,13 +1165,18 @@ if (window.location.pathname.endsWith('admin.html')) {
         if (!res.ok) throw new Error('Error al guardar');
         feedback.textContent = '✔️';
         feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
-        setTimeout(() => feedback.textContent = '', 1200);
-        cargarProductos();
+        setTimeout(async () => {
+          await cargarProductos();
+          if (vistaTablaContainer && !vistaTablaContainer.classList.contains('hidden')) {
+            await cargarProductosTabla();
+          }
+        }, 1200);
       } catch (err) {
         feedback.textContent = err.message || 'Error';
         feedback.className = 'text-red-600 dark:text-red-400';
       }
     };
+    
     // Eliminar producto
     card.querySelector('[data-accion="eliminar"]').onclick = async () => {
       if (!confirm('¿Eliminar este producto?')) return;
@@ -843,15 +1188,23 @@ if (window.location.pathname.endsWith('admin.html')) {
           method: 'DELETE',
           headers: { 'Authorization': 'Bearer ' + jwt }
         });
+        
         if (!res.ok) throw new Error('Error al eliminar');
+        
         feedback.textContent = 'Eliminado';
         feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
-        setTimeout(() => cargarProductos(), 800);
+        setTimeout(async () => {
+          await cargarProductos();
+          if (vistaTablaContainer && !vistaTablaContainer.classList.contains('hidden')) {
+            await cargarProductosTabla();
+          }
+        }, 800);
       } catch (err) {
         feedback.textContent = 'Error';
         feedback.className = 'text-red-600 dark:text-red-400';
       }
     };
+    
     // Activar/desactivar
     card.querySelector('[data-accion="toggle-activo"]').onclick = async () => {
       const feedback = card.querySelector(`#feedback-${id}`);
@@ -866,7 +1219,12 @@ if (window.location.pathname.endsWith('admin.html')) {
         if (!res.ok) throw new Error('Error al actualizar');
         feedback.textContent = '✔️';
         feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
-        setTimeout(() => cargarProductos(), 800);
+        setTimeout(async () => {
+          await cargarProductos();
+          if (vistaTablaContainer && !vistaTablaContainer.classList.contains('hidden')) {
+            await cargarProductosTabla();
+          }
+        }, 1200);
       } catch (err) {
         feedback.textContent = 'Error';
         feedback.className = 'text-red-600 dark:text-red-400';
@@ -874,38 +1232,259 @@ if (window.location.pathname.endsWith('admin.html')) {
     };
   }
 
-  // --- Crear categoría desde el panel admin ---
+  // --- 5. Gestión de categorías ---
   const categoriaForm = document.getElementById('categoria-form');
   const nombreCategoriaInput = document.getElementById('nombre-categoria');
   const categoriaFormMsg = document.getElementById('categoria-form-msg');
-  if (categoriaForm) {
-    categoriaForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      categoriaFormMsg.textContent = 'Creando categoría...';
-      categoriaFormMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
-      try {
-        const res = await fetch(`${API_URL}/categorias`, {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + jwt,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ nombre: nombreCategoriaInput.value })
-        });
-        if (!res.ok) throw new Error('Error al crear categoría');
-        categoriaFormMsg.textContent = '¡Categoría creada!';
-        categoriaFormMsg.className = 'text-green-600 dark:text-green-400 animate-bounce';
-        categoriaForm.reset();
-        cargarCategorias();
-      } catch (err) {
-        categoriaFormMsg.textContent = err.message || 'Error al crear categoría';
-        categoriaFormMsg.className = 'text-red-600 dark:text-red-400';
-      }
-    });
+
+  categoriaForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    categoriaFormMsg.textContent = 'Creando categoría...';
+    categoriaFormMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+    
+    try {
+      const res = await fetch(`${API_URL}/categorias`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': 'Bearer ' + jwt,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nombre: nombreCategoriaInput.value })
+      });
+      
+      if (!res.ok) throw new Error('Error al crear categoría');
+      
+      categoriaFormMsg.textContent = '¡Categoría creada!';
+      categoriaFormMsg.className = 'text-green-600 dark:text-green-400 animate-bounce';
+      categoriaForm.reset();
+      
+      // Recargar categorías
+      await cargarCategorias();
+      await cargarCategoriasAdmin();
+      
+    } catch (err) {
+      categoriaFormMsg.textContent = err.message || 'Error al crear categoría';
+      categoriaFormMsg.className = 'text-red-600 dark:text-red-400';
+    }
+  });
+
+  async function cargarCategoriasAdmin() {
+    try {
+      const res = await fetch(`${API_URL}/categorias`);
+      if (!res.ok) throw new Error('Error al cargar categorías');
+      const categorias = await res.json();
+      
+      categoriasContainer.innerHTML = categorias.map(cat => `
+        <div class="bg-brandy-50 dark:bg-brandy-800 rounded-lg p-4 border border-brandy-200 dark:border-brandy-700">
+          <div class="flex justify-between items-center">
+            <h4 class="font-semibold text-brandy-700 dark:text-brandy-100">${cat.nombre}</h4>
+            <div class="flex gap-2">
+              <button class="text-brandy-500 hover:text-brandy-700 dark:text-brandy-400 dark:hover:text-brandy-200 transition editar-categoria" data-id="${cat.id}" data-nombre="${cat.nombre}">
+                ✏️
+              </button>
+              <button class="text-red-500 hover:text-red-700 transition eliminar-categoria" data-id="${cat.id}">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      // Eventos para editar y eliminar categorías
+      categoriasContainer.querySelectorAll('.editar-categoria').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.id;
+          const nombre = btn.dataset.nombre;
+          document.getElementById('categoria-id-editar').value = id;
+          document.getElementById('categoria-nombre-editar').value = nombre;
+          modalEditarCategoria.classList.remove('hidden');
+        };
+      });
+      
+      categoriasContainer.querySelectorAll('.eliminar-categoria').forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.id;
+          if (!confirm('¿Eliminar esta categoría?')) return;
+          
+          try {
+            const res = await fetch(`${API_URL}/categorias/${id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': 'Bearer ' + jwt }
+            });
+            
+            if (!res.ok) throw new Error('Error al eliminar categoría');
+            
+            await cargarCategoriasAdmin();
+            await cargarCategorias();
+            
+          } catch (err) {
+            alert('Error al eliminar categoría: ' + err.message);
+          }
+        };
+      });
+      
+    } catch (err) {
+      categoriasContainer.innerHTML = '<div class="text-red-600 dark:text-red-400">Error al cargar categorías</div>';
+    }
   }
 
-  // --- Inicialización ---
-  cargarCategorias().then(cargarProductos);
+  // --- 6. Vista de tabla ---
+  async function cargarProductosTabla() {
+    if (!tablaProductos) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/admin/productos`, {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      if (!res.ok) throw new Error('Error al cargar productos');
+      const productos = await res.json();
+      
+      tablaProductos.innerHTML = productos.map(p => {
+        const img = (p.imagenes && p.imagenes.length > 0) ? `/imagenes_productos/${p.imagenes[0].url}` : 'img/no-image.png';
+        const estado = p.activo ? 
+          '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Activo</span>' : 
+          '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>';
+        
+        return `
+          <tr class="hover:bg-brandy-50 dark:hover:bg-brandy-700">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <img src="${img}" alt="${p.nombre}" class="h-12 w-12 object-cover rounded">
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-brandy-700 dark:text-brandy-100">${p.nombre}</div>
+              <div class="text-sm text-brandy-500 dark:text-brandy-300">${p.descripcion.substring(0, 50)}${p.descripcion.length > 50 ? '...' : ''}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm text-brandy-700 dark:text-brandy-100">${p.categoria ? p.categoria.nombre : 'Sin categoría'}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm font-semibold text-brandy-700 dark:text-brandy-100">${formatoCOP(p.precio)}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm text-brandy-700 dark:text-brandy-100">${p.stock}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              ${estado}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex gap-2">
+                <button onclick="editarProductoDesdeTabla(${p.id})" 
+                        class="text-brandy-600 dark:text-brandy-400 hover:text-brandy-900 dark:hover:text-brandy-100">
+                  ✏️ Editar
+                </button>
+                <button onclick="eliminarProductoDesdeTabla(${p.id})" 
+                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-100">
+                  🗑️ Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      tablaProductos.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600 dark:text-red-400">Error al cargar productos</td></tr>';
+    }
+  }
+
+  // Funciones globales para acciones desde tabla
+  window.editarProductoDesdeTabla = function(id) {
+    vistaTarjetasBtn.click();
+    setTimeout(() => {
+      const productoCard = document.getElementById(`prod-${id}`);
+      if (productoCard) {
+        productoCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        productoCard.style.border = '2px solid #8B4513';
+        setTimeout(() => {
+          productoCard.style.border = '';
+        }, 3000);
+      }
+    }, 100);
+  };
+
+  window.eliminarProductoDesdeTabla = async function(id) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${API_URL}/admin/productos/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      
+      if (!res.ok) throw new Error('Error al eliminar producto');
+      
+      alert('Producto eliminado exitosamente');
+      cargarProductosTabla();
+      cargarProductos();
+    } catch (err) {
+      alert('Error al eliminar producto: ' + err.message);
+    }
+  };
+
+  // --- 7. Inicialización del panel admin ---
+  async function inicializarPanelAdmin() {
+    await cargarCategorias();
+    await cargarProductos();
+    await cargarCategoriasAdmin();
+  }
+
+  // --- 8. Eventos de vista (tarjetas/tabla) ---
+  vistaTarjetasBtn.addEventListener('click', () => {
+    vistaTarjetasBtn.className = 'px-4 py-2 rounded-lg bg-brandy-500 text-white hover:bg-brandy-600 transition font-semibold';
+    vistaTablaBtn.className = 'px-4 py-2 rounded-lg bg-brandy-200 dark:bg-brandy-700 text-brandy-700 dark:text-brandy-100 hover:bg-brandy-300 dark:hover:bg-brandy-800 transition font-semibold';
+    vistaTarjetasContainer.classList.remove('hidden');
+    vistaTablaContainer.classList.add('hidden');
+  });
+
+  vistaTablaBtn.addEventListener('click', async () => {
+    vistaTablaBtn.className = 'px-4 py-2 rounded-lg bg-brandy-500 text-white hover:bg-brandy-600 transition font-semibold';
+    vistaTarjetasBtn.className = 'px-4 py-2 rounded-lg bg-brandy-200 dark:bg-brandy-700 text-brandy-700 dark:text-brandy-100 hover:bg-brandy-300 dark:hover:bg-brandy-800 transition font-semibold';
+    vistaTarjetasContainer.classList.add('hidden');
+    vistaTablaContainer.classList.remove('hidden');
+    await cargarProductosTabla();
+  });
+
+  // --- 9. Modal de editar categoría ---
+  formEditarCategoria.addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('categoria-id-editar').value;
+    const nombre = document.getElementById('categoria-nombre-editar').value;
+    
+    try {
+      const res = await fetch(`${API_URL}/categorias/${id}`, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': 'Bearer ' + jwt,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nombre })
+      });
+      
+      if (!res.ok) throw new Error('Error al editar categoría');
+      
+      modalEditarCategoria.classList.add('hidden');
+      await cargarCategoriasAdmin();
+      await cargarCategorias();
+      
+    } catch (err) {
+      alert('Error al editar categoría: ' + err.message);
+    }
+  });
+
+  cancelarEditarCategoria.addEventListener('click', () => {
+    modalEditarCategoria.classList.add('hidden');
+  });
+
+  // Cerrar modal al hacer clic fuera
+  modalEditarCategoria.addEventListener('click', (e) => {
+    if (e.target === modalEditarCategoria) {
+      modalEditarCategoria.classList.add('hidden');
+    }
+  });
+
+  // Ejecutar inicialización cuando se carga la página
+  inicializarPanelAdmin();
 }
 
 // Quitar el outline molesto al hacer click en el cuadro del producto y evitar el cursor de texto/caret
@@ -964,3 +1543,71 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
+window.addEventListener('load', () => {
+  const preloader = document.getElementById('preloader');
+  if (preloader) {
+    preloader.style.opacity = '0';
+    preloader.style.pointerEvents = 'none';
+    setTimeout(() => preloader.style.display = 'none', 500);
+  }
+});
+
+// Variables globales para el usuario y carrito
+let usuarioActual = null;
+let carritoKey = null;
+let carrito = [];
+
+// Función para cargar el usuario y el carrito al iniciar sesión
+function cargarUsuarioYCarrito() {
+  const jwt = localStorage.getItem('jwt');
+  if (!jwt) return;
+  fetch('/api/auth/me', {
+    headers: { 'Authorization': 'Bearer ' + jwt }
+  })
+    .then(res => res.ok ? res.json() : null)
+    .then(user => {
+      if (user && user.id) {
+        usuarioActual = user;
+        carritoKey = `carrito_${user.id}`;
+        const guardado = localStorage.getItem(carritoKey);
+        carrito = guardado ? JSON.parse(guardado) : [];
+        renderizarCarrito();
+        actualizarContadorCarrito();
+      }
+    });
+}
+
+// Guardar carrito por usuario
+function guardarCarrito() {
+  if (carritoKey) {
+    localStorage.setItem(carritoKey, JSON.stringify(carrito));
+  }
+}
+
+// Renderizar carrito leyendo siempre del localStorage
+function renderizarCarrito() {
+  if (!carritoKey) return;
+  const guardado = localStorage.getItem(carritoKey);
+  carrito = guardado ? JSON.parse(guardado) : [];
+  // ... (resto del renderizado del carrito)
+}
+
+// Al agregar/quitar productos, usar guardarCarrito()
+// ... (en las funciones correspondientes)
+
+// Cerrar slide del carrito solo oculta el panel
+function cerrarCarritoSlide() {
+  const carritoSlide = document.getElementById('carrito-slide');
+  if (carritoSlide) {
+    carritoSlide.classList.add('translate-x-full');
+  }
+}
+
+// Al iniciar sesión, cargar usuario y carrito
+window.addEventListener('DOMContentLoaded', cargarUsuarioYCarrito);
+
+// Formateador de moneda COP
+function formatoCOP(valor) {
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
+}

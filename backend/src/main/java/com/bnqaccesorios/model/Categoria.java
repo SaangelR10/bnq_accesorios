@@ -3,8 +3,7 @@ package com.bnqaccesorios.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "categorias")
@@ -20,6 +19,6 @@ public class Categoria {
     private String nombre;
 
     @OneToMany(mappedBy = "categoria")
-    @JsonManagedReference
+    @JsonIgnoreProperties("categoria")
     private List<Producto> productos;
 } 

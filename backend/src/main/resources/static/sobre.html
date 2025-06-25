@@ -5,21 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sobre nosotros | BNQ Accesorios</title>
   <link href="output.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="img/logo.png">
 </head>
 <body class="min-h-screen flex flex-col">
+  <!-- Preloader -->
+  <div id="preloader" class="fixed inset-0 z-50 flex items-center justify-center bg-brandy-50 dark:bg-brandy-900 transition-all duration-500">
+    <svg class="animate-spin" width="80" height="80" viewBox="0 0 50 50">
+      <circle class="opacity-20" cx="25" cy="25" r="20" stroke="#a8743b" stroke-width="6" fill="none"/>
+      <circle class="opacity-80" cx="25" cy="25" r="20" stroke="#8B4513" stroke-width="6" fill="none"
+        stroke-linecap="round"
+        stroke-dasharray="100"
+        stroke-dashoffset="60"/>
+    </svg>
+  </div>
   <!-- Menú superior -->
   <header class="fixed top-0 left-0 w-full bg-brandy-50 dark:bg-brandy-900 shadow z-50">
     <nav class="container mx-auto flex items-center justify-between py-3 px-4">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-shrink-0 w-1/4 justify-start">
         <img src="/img/logo.png" alt="BNQ Accesorios Logo" class="h-10 w-10">
         <span class="text-brandy-700 dark:text-brandy-100 font-bold text-xl tracking-widest">BNQ ACCESORIOS</span>
       </div>
-      <div class="hidden md:flex gap-8 items-center" id="main-menu">
-        <a href="index.html" class="hover:text-brandy-500 transition">Inicio</a>
-        <a href="catalogo.html" class="hover:text-brandy-500 transition">Catálogo</a>
-        <a href="cuenta.html" class="cuenta-link hover:text-brandy-500 transition">Mi cuenta</a>
-        <a href="sobre.html" class="hover:text-brandy-500 transition font-bold underline">Sobre nosotros</a>
-        <a href="admin.html" class="admin-link hidden hover:text-brandy-500 transition">Admin</a>
+      <div class="hidden md:flex flex-1 justify-center">
+        <div class="flex gap-8 items-center" id="main-menu">
+          <a href="index.html" class="hover:text-brandy-500 transition">Inicio</a>
+          <a href="catalogo.html" class="hover:text-brandy-500 transition">Catálogo</a>
+          <a href="sobre.html" class="hover:text-brandy-500 transition font-bold underline">Sobre nosotros</a>
+          <a href="admin.html" class="admin-link hidden hover:text-brandy-500 transition">Admin</a>
+        </div>
+      </div>
+      <div class="hidden md:flex gap-4 items-center flex-shrink-0 w-1/4 justify-end">
         <span id="user-info" class="hidden text-brandy-700 dark:text-brandy-100 font-semibold"></span>
         <button id="logout-btn" class="hidden ml-2 px-3 py-1 rounded bg-brandy-200 dark:bg-brandy-700 text-brandy-700 dark:text-brandy-100 hover:bg-brandy-300 dark:hover:bg-brandy-800 transition text-sm">Cerrar sesión</button>
         <button id="dark-toggle" class="ml-4 p-2 rounded hover:bg-brandy-100 dark:hover:bg-brandy-800 transition">🌙</button>
