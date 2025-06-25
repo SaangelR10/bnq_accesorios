@@ -229,3 +229,309 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       console.error('Error al cargar productos:', err);
     });
 }
+
+// ================= PANEL ADMIN =================
+if (window.location.pathname.endsWith('admin.html')) {
+  // --- Utilidades ---
+  const jwt = localStorage.getItem('jwt');
+  const API_URL = '/api';
+  const form = document.getElementById('producto-form');
+  const dropArea = document.getElementById('drop-area');
+  const inputImagenes = document.getElementById('imagenes');
+  const preview = document.getElementById('preview');
+  const limpiarBtn = document.getElementById('limpiar-form');
+  const msgDiv = document.getElementById('producto-form-msg');
+  const categoriaSelect = document.getElementById('categoria');
+  const adminProductosContainer = document.getElementById('admin-productos-container');
+  const adminProductosMsg = document.getElementById('admin-productos-msg');
+  const archivoMasivo = document.getElementById('archivo-masivo');
+  const cargarMasivoBtn = document.getElementById('cargar-masivo');
+  const descargarPlantilla = document.getElementById('descargar-plantilla');
+  const masivoMsg = document.getElementById('masivo-msg');
+
+  // --- 1. Drag & drop y previsualización de imágenes ---
+  let imagenesSeleccionadas = [];
+  function mostrarPreview(files) {
+    preview.innerHTML = '';
+    [...files].forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const div = document.createElement('div');
+        div.className = 'relative group';
+        div.innerHTML = `
+          <img src="${e.target.result}" class="h-20 w-20 object-cover rounded shadow border-2 border-brandy-200 dark:border-brandy-700 transition-transform group-hover:scale-105 duration-200">
+          <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs opacity-80 hover:opacity-100 transition" data-idx="${idx}">✕</button>
+        `;
+        preview.appendChild(div);
+        div.querySelector('button').onclick = () => {
+          imagenesSeleccionadas.splice(idx, 1);
+          mostrarPreview(imagenesSeleccionadas);
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  dropArea.addEventListener('click', () => inputImagenes.click());
+  dropArea.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropArea.classList.add('border-brandy-500', 'bg-brandy-200');
+  });
+  dropArea.addEventListener('dragleave', e => {
+    e.preventDefault();
+    dropArea.classList.remove('border-brandy-500', 'bg-brandy-200');
+  });
+  dropArea.addEventListener('drop', e => {
+    e.preventDefault();
+    dropArea.classList.remove('border-brandy-500', 'bg-brandy-200');
+    imagenesSeleccionadas = [...e.dataTransfer.files];
+    mostrarPreview(imagenesSeleccionadas);
+  });
+  inputImagenes.addEventListener('change', e => {
+    imagenesSeleccionadas = [...e.target.files];
+    mostrarPreview(imagenesSeleccionadas);
+  });
+
+  // --- 2. Envío del formulario como multipart/form-data ---
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    msgDiv.textContent = 'Guardando producto...';
+    msgDiv.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+    // Empaquetar los datos del producto
+    const producto = {
+      nombre: form.nombre.value,
+      descripcion: form.descripcion.value,
+      precio: form.precio.value,
+      stock: form.stock.value,
+      materiales: form.materiales.value
+    };
+    const categoriaId = form.categoria.value;
+    const formData = new FormData();
+    formData.append('producto', JSON.stringify(producto));
+    formData.append('categoriaId', categoriaId);
+    imagenesSeleccionadas.forEach(img => formData.append('imagenes', img));
+    try {
+      const res = await fetch(`${API_URL}/admin/productos`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + jwt },
+        body: formData
+      });
+      if (!res.ok) throw new Error('Error al guardar producto');
+      msgDiv.textContent = '¡Producto guardado!';
+      msgDiv.className = 'text-green-600 dark:text-green-400 animate-bounce';
+      form.reset();
+      imagenesSeleccionadas = [];
+      mostrarPreview([]);
+      cargarProductos();
+    } catch (err) {
+      msgDiv.textContent = err.message || 'Error al guardar producto';
+      msgDiv.className = 'text-red-600 dark:text-red-400';
+    }
+  });
+  limpiarBtn.addEventListener('click', () => {
+    form.reset();
+    imagenesSeleccionadas = [];
+    mostrarPreview([]);
+    msgDiv.textContent = '';
+  });
+
+  // --- 3. Carga masiva de productos ---
+  descargarPlantilla.addEventListener('click', e => {
+    e.preventDefault();
+    // Descarga plantilla CSV simple
+    const csv = 'nombre,precio,stock,descripcion,materiales,categoria\n';
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plantilla_productos.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+  cargarMasivoBtn.addEventListener('click', async () => {
+    if (!archivoMasivo.files.length) {
+      masivoMsg.textContent = 'Selecciona un archivo primero.';
+      masivoMsg.className = 'text-red-600 dark:text-red-400';
+      return;
+    }
+    masivoMsg.textContent = 'Cargando productos...';
+    masivoMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+    const formData = new FormData();
+    formData.append('archivo', archivoMasivo.files[0]);
+    try {
+      const res = await fetch(`${API_URL}/productos/masivo`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + jwt },
+        body: formData
+      });
+      if (!res.ok) throw new Error('Error al cargar archivo');
+      masivoMsg.textContent = '¡Productos cargados!';
+      masivoMsg.className = 'text-green-600 dark:text-green-400 animate-bounce';
+      archivoMasivo.value = '';
+      cargarProductos();
+    } catch (err) {
+      masivoMsg.textContent = err.message || 'Error al cargar archivo';
+      masivoMsg.className = 'text-red-600 dark:text-red-400';
+    }
+  });
+
+  // --- 4. Renderizado y edición inline de productos ---
+  async function cargarCategorias() {
+    try {
+      const res = await fetch(`${API_URL}/categorias`);
+      if (!res.ok) throw new Error('Error al cargar categorías');
+      const cats = await res.json();
+      categoriaSelect.innerHTML = '<option value="">Selecciona categoría</option>' +
+        cats.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    } catch (err) {
+      categoriaSelect.innerHTML = '<option value="">Error al cargar</option>';
+    }
+  }
+  async function cargarProductos() {
+    adminProductosMsg.textContent = 'Cargando productos...';
+    adminProductosMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+    try {
+      const res = await fetch(`${API_URL}/admin/productos`, {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      if (!res.ok) throw new Error('Error al cargar productos');
+      const productos = await res.json();
+      if (!productos.length) {
+        adminProductosContainer.innerHTML = '';
+        adminProductosMsg.textContent = 'No hay productos.';
+        return;
+      }
+      adminProductosMsg.textContent = '';
+      adminProductosContainer.innerHTML = productos.map(p => renderProductoCard(p)).join('');
+      productos.forEach(p => asignarEventosProducto(p.id));
+    } catch (err) {
+      adminProductosMsg.textContent = err.message || 'Error al cargar productos';
+      adminProductosMsg.className = 'text-red-600 dark:text-red-400';
+    }
+  }
+  function renderProductoCard(p) {
+    const img = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].url.replace('uploads', '') : 'img/no-image.png';
+    return `
+      <div class="bg-white dark:bg-brandy-900 rounded-lg shadow p-6 flex flex-col gap-2 relative group transition-transform hover:scale-105 duration-200" id="prod-${p.id}">
+        <img src="${img}" alt="${p.nombre}" class="h-32 w-32 object-cover rounded mb-2 mx-auto">
+        <input class="text-xl font-bold text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition" value="${p.nombre}" data-field="nombre" data-id="${p.id}">
+        <textarea class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition" data-field="descripcion" data-id="${p.id}">${p.descripcion}</textarea>
+        <input type="number" class="text-lg font-semibold text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition" value="${p.precio}" data-field="precio" data-id="${p.id}">
+        <input type="number" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition" value="${p.stock}" data-field="stock" data-id="${p.id}">
+        <div class="flex justify-center gap-2 mt-2">
+          <button class="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600 transition" data-accion="guardar" data-id="${p.id}">💾</button>
+          <button class="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition" data-accion="eliminar" data-id="${p.id}">🗑️</button>
+          <button class="px-3 py-1 rounded ${p.activo ? 'bg-brandy-500' : 'bg-gray-400'} text-white hover:bg-brandy-600 transition" data-accion="toggle-activo" data-id="${p.id}">${p.activo ? 'Activo' : 'Inactivo'}</button>
+        </div>
+        <div class="text-xs text-center mt-1 text-brandy-500 dark:text-brandy-200">ID: ${p.id}</div>
+        <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">${p.categoria ? p.categoria.nombre : ''}</div>
+        <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">${p.materiales || ''}</div>
+        <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">${p.fechaCreacion ? new Date(p.fechaCreacion).toLocaleDateString() : ''}</div>
+        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" id="feedback-${p.id}"></div>
+      </div>
+    `;
+  }
+  function asignarEventosProducto(id) {
+    const card = document.getElementById(`prod-${id}`);
+    if (!card) return;
+    // Guardar cambios
+    card.querySelector('[data-accion="guardar"]').onclick = async () => {
+      const nombre = card.querySelector('[data-field="nombre"]').value;
+      const descripcion = card.querySelector('[data-field="descripcion"]').value;
+      const precio = card.querySelector('[data-field="precio"]').value;
+      const stock = card.querySelector('[data-field="stock"]').value;
+      const feedback = card.querySelector(`#feedback-${id}`);
+      feedback.textContent = 'Guardando...';
+      feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+      try {
+        const res = await fetch(`${API_URL}/admin/productos/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'Bearer ' + jwt
+          },
+          body: JSON.stringify({ nombre, descripcion, precio, stock })
+        });
+        if (!res.ok) throw new Error('Error al guardar');
+        feedback.textContent = '✔️';
+        feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
+        setTimeout(() => feedback.textContent = '', 1200);
+      } catch (err) {
+        feedback.textContent = 'Error';
+        feedback.className = 'text-red-600 dark:text-red-400';
+      }
+    };
+    // Eliminar producto
+    card.querySelector('[data-accion="eliminar"]').onclick = async () => {
+      if (!confirm('¿Eliminar este producto?')) return;
+      const feedback = card.querySelector(`#feedback-${id}`);
+      feedback.textContent = 'Eliminando...';
+      feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+      try {
+        const res = await fetch(`${API_URL}/admin/productos/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + jwt }
+        });
+        if (!res.ok) throw new Error('Error al eliminar');
+        feedback.textContent = 'Eliminado';
+        feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
+        setTimeout(() => cargarProductos(), 800);
+      } catch (err) {
+        feedback.textContent = 'Error';
+        feedback.className = 'text-red-600 dark:text-red-400';
+      }
+    };
+    // Activar/desactivar
+    card.querySelector('[data-accion="toggle-activo"]').onclick = async () => {
+      const feedback = card.querySelector(`#feedback-${id}`);
+      feedback.textContent = 'Actualizando...';
+      feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+      try {
+        const res = await fetch(`${API_URL}/admin/productos/${id}/toggle-activo`, {
+          method: 'PATCH',
+          headers: { 'Authorization': 'Bearer ' + jwt }
+        });
+        if (!res.ok) throw new Error('Error al actualizar');
+        feedback.textContent = '✔️';
+        feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
+        setTimeout(() => cargarProductos(), 800);
+      } catch (err) {
+        feedback.textContent = 'Error';
+        feedback.className = 'text-red-600 dark:text-red-400';
+      }
+    };
+  }
+
+  // --- Crear categoría desde el panel admin ---
+  const categoriaForm = document.getElementById('categoria-form');
+  const nombreCategoriaInput = document.getElementById('nombre-categoria');
+  const categoriaFormMsg = document.getElementById('categoria-form-msg');
+  if (categoriaForm) {
+    categoriaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      categoriaFormMsg.textContent = 'Creando categoría...';
+      categoriaFormMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+      try {
+        const res = await fetch(`${API_URL}/categorias`, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + jwt
+          },
+          body: JSON.stringify({ nombre: nombreCategoriaInput.value })
+        });
+        if (!res.ok) throw new Error('Error al crear categoría');
+        categoriaFormMsg.textContent = '¡Categoría creada!';
+        categoriaFormMsg.className = 'text-green-600 dark:text-green-400 animate-bounce';
+        categoriaForm.reset();
+        cargarCategorias();
+      } catch (err) {
+        categoriaFormMsg.textContent = err.message || 'Error al crear categoría';
+        categoriaFormMsg.className = 'text-red-600 dark:text-red-400';
+      }
+    });
+  }
+
+  // --- Inicialización ---
+  cargarCategorias();
+  cargarProductos();
+}

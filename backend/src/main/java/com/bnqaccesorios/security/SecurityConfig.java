@@ -36,7 +36,6 @@ public class SecurityConfig {
                 .build();
     }
 
-    // ... existing code ...
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -59,9 +58,11 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers("/api/auth/me").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/categorias").permitAll()
+                .requestMatchers("/api/categorias/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-}// ... existing code ...
+}
