@@ -53,6 +53,21 @@
     <h1 class="text-4xl md:text-5xl font-bold text-brandy-700 dark:text-brandy-100 mb-4 tracking-widest">Bienvenido a BNQ Accesorios</h1>
     <p class="text-lg text-brandy-800 dark:text-brandy-200 mb-8 text-center max-w-xl">Accesorios artesanales únicos, hechos con pasión y elegancia. Descubre nuestro catálogo y encuentra la pieza perfecta para ti.</p>
     <a href="catalogo.html" class="px-8 py-3 bg-brandy-500 text-white rounded-lg shadow hover:bg-brandy-600 transition text-lg font-semibold">Ver catálogo</a>
+    <!-- Slide-over del carrito -->
+    <div id="carrito-slide" class="fixed top-0 right-0 h-full w-full max-w-md bg-white dark:bg-brandy-900 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+      <div class="flex items-center justify-between p-6 border-b border-brandy-100 dark:border-brandy-800">
+        <h2 class="text-2xl font-bold text-brandy-700 dark:text-brandy-100">Carrito</h2>
+        <button id="cerrar-carrito" class="text-2xl text-brandy-400 hover:text-brandy-700 dark:hover:text-brandy-100 transition">&times;</button>
+      </div>
+      <div id="carrito-items" class="flex-1 overflow-y-auto p-6"></div>
+      <div class="p-6 border-t border-brandy-100 dark:border-brandy-800">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-lg font-semibold text-brandy-700 dark:text-brandy-100">Total</span>
+          <span id="carrito-total" class="text-xl font-bold text-brandy-500 dark:text-brandy-200"></span>
+        </div>
+        <button id="finalizar-compra" class="w-full bg-brandy-500 text-white py-3 rounded-lg font-semibold text-lg shadow hover:bg-brandy-600 transition">Finalizar compra</button>
+      </div>
+    </div>
   </main>
 
   <footer class="text-center py-4 text-brandy-600 dark:text-brandy-200 text-sm bg-brandy-50 dark:bg-brandy-900 border-t border-brandy-100 dark:border-brandy-800">
