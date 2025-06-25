@@ -98,12 +98,26 @@ public class ProductoService {
             Path ruta = Paths.get(uploadDir + nombreArchivo);
             Files.write(ruta, file.getBytes());
             ImagenProducto img = new ImagenProducto();
-            img.setUrl(ruta.toString());
+            img.setUrl(nombreArchivo);
             img.setProducto(producto);
             imagenProductoRepository.save(img);
             imagenesGuardadas.add(img);
         }
         producto.getImagenes().addAll(imagenesGuardadas);
         productoRepository.save(producto);
+    }
+
+    public Producto buscarPorNombre(String nombre) {
+        return productoRepository.findByNombre(nombre).orElse(null);
+    }
+
+    public Producto editarProductoInline(Long id, Producto datos) {
+        Producto producto = productoRepository.findById(id).orElseThrow();
+        producto.setNombre(datos.getNombre());
+        producto.setDescripcion(datos.getDescripcion());
+        producto.setPrecio(datos.getPrecio());
+        producto.setStock(datos.getStock());
+        // Puedes agregar más campos si lo deseas
+        return productoRepository.save(producto);
     }
 } 

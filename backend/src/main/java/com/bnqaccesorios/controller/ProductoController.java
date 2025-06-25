@@ -7,6 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,10 +48,12 @@ public class ProductoController {
     @PostMapping(value = "/admin/productos", consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Producto> crearProducto(
-            @RequestPart("producto") Producto producto,
-            @RequestPart("categoriaId") Long categoriaId,
-            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes
+            @RequestParam("producto") String productoJson,
+            @RequestParam("categoriaId") Long categoriaId,
+            @RequestParam(value = "imagenes", required = false) List<MultipartFile> imagenes
     ) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Producto producto = mapper.readValue(productoJson, Producto.class);
         Producto creado = productoService.crearProducto(producto, categoriaId, imagenes);
         return ResponseEntity.ok(creado);
     }
@@ -67,10 +77,38 @@ public class ProductoController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/admin/productos/{id}/estado")
+    @PatchMapping(value = "/admin/productos/{id}/estado", consumes = {"application/json", "application/x-www-form-urlencoded"})
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Producto> cambiarEstado(@PathVariable Long id, @RequestParam boolean activo) {
         Producto actualizado = productoService.cambiarEstado(id, activo);
         return ResponseEntity.ok(actualizado);
+    }
+
+    // Servir imágenes de productos
+    @GetMapping("/imagenes_productos/{filename:.+}")
+    public ResponseEntity<Resource> getImagen(@PathVariable String filename) throws Exception {
+        Path file = Paths.get(System.getProperty("user.dir"), "uploads", "imagenes_productos").resolve(filename);
+        if (!Files.exists(file)) {
+            return ResponseEntity.notFound().build();
+        }
+        Resource resource = new UrlResource(file.toUri());
+        String contentType = Files.probeContentType(file);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType != null ? contentType : "application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                .body(resource);
+    }
+
+    // PUT para edición inline (application/json)
+    @PutMapping(value = "/admin/productos/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> editarProductoInline(@PathVariable Long id, @RequestBody Producto datos) {
+        // Validar nombre único
+        Producto existente = productoService.buscarPorNombre(datos.getNombre());
+        if (existente != null && !existente.getId().equals(id)) {
+            return ResponseEntity.status(409).body("Ya existe un producto con ese nombre");
+        }
+        Producto editado = productoService.editarProductoInline(id, datos);
+        return ResponseEntity.ok(editado);
     }
 } 

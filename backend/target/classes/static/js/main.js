@@ -212,7 +212,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
         return;
       }
       productosContainer.innerHTML = productos.map(p => {
-        const img = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].url.replace('uploads', '') : 'img/no-image.png';
+        const img = (p.imagenes && p.imagenes.length > 0) ? `/imagenes_productos/${p.imagenes[0].url}` : 'img/no-image.png';
         return `
           <div class="bg-white dark:bg-brandy-800 rounded-lg shadow p-6 flex flex-col items-center">
             <img src="${img}" alt="${p.nombre}" class="h-40 w-40 object-cover rounded mb-4">
@@ -220,6 +220,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
             <p class="text-brandy-600 dark:text-brandy-200 mb-2">${p.descripcion}</p>
             <span class="text-brandy-500 font-bold text-lg mb-4">$${p.precio}</span>
             <button class="bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition">Agregar al carrito</button>
+            <a href="producto.html?id=${p.id}" class="mt-2 text-brandy-500 hover:underline text-sm">Ver detalles</a>
           </div>
         `;
       }).join('');
@@ -309,6 +310,10 @@ if (window.location.pathname.endsWith('admin.html')) {
     formData.append('producto', JSON.stringify(producto));
     formData.append('categoriaId', categoriaId);
     imagenesSeleccionadas.forEach(img => formData.append('imagenes', img));
+    // DEBUG: Mostrar el contenido real del FormData antes de enviar
+    for (let pair of formData.entries()) {
+      console.log('FormData', pair[0], pair[1]);
+    }
     try {
       const res = await fetch(`${API_URL}/admin/productos`, {
         method: 'POST',
@@ -411,22 +416,37 @@ if (window.location.pathname.endsWith('admin.html')) {
     }
   }
   function renderProductoCard(p) {
-    const img = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].url.replace('uploads', '') : 'img/no-image.png';
+    const img = (p.imagenes && p.imagenes.length > 0) ? `/imagenes_productos/${p.imagenes[0].url}` : 'img/no-image.png';
     return `
       <div class="bg-white dark:bg-brandy-900 rounded-lg shadow p-6 flex flex-col gap-2 relative group transition-transform hover:scale-105 duration-200" id="prod-${p.id}">
-        <img src="${img}" alt="${p.nombre}" class="h-32 w-32 object-cover rounded mb-2 mx-auto">
-        <input class="text-xl font-bold text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition" value="${p.nombre}" data-field="nombre" data-id="${p.id}">
-        <textarea class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition" data-field="descripcion" data-id="${p.id}">${p.descripcion}</textarea>
-        <input type="number" class="text-lg font-semibold text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition" value="${p.precio}" data-field="precio" data-id="${p.id}">
-        <input type="number" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition" value="${p.stock}" data-field="stock" data-id="${p.id}">
+        <img src="${img}" alt="${p.nombre}" class="h-32 w-32 object-cover rounded mb-2 mx-auto border border-brandy-200 dark:border-brandy-700">
+        <div class="flex flex-col gap-1 mb-2">
+          <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="nombre-${p.id}">Nombre</label>
+          <input id="nombre-${p.id}" class="text-xl font-bold text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" value="${p.nombre}" data-field="nombre" data-id="${p.id}">
+        </div>
+        <div class="flex flex-col gap-1 mb-2">
+          <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="descripcion-${p.id}">Descripción</label>
+          <textarea id="descripcion-${p.id}" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" data-field="descripcion" data-id="${p.id}">${p.descripcion}</textarea>
+        </div>
+        <div class="flex flex-col gap-1 mb-2">
+          <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="precio-${p.id}">Precio</label>
+          <input id="precio-${p.id}" type="number" class="text-lg font-semibold text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" value="${p.precio}" data-field="precio" data-id="${p.id}">
+        </div>
+        <div class="flex flex-col gap-1 mb-2">
+          <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="stock-${p.id}">Stock</label>
+          <input id="stock-${p.id}" type="number" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" value="${p.stock}" data-field="stock" data-id="${p.id}">
+        </div>
+        <div class="flex flex-col gap-1 mb-2">
+          <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="materiales-${p.id}">Materiales</label>
+          <input id="materiales-${p.id}" class="text-sm text-center bg-transparent focus:bg-brandy-100 dark:focus:bg-brandy-800 rounded p-1 mb-1 transition border border-brandy-200 dark:border-brandy-700" value="${p.materiales || ''}" data-field="materiales" data-id="${p.id}">
+        </div>
         <div class="flex justify-center gap-2 mt-2">
-          <button class="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600 transition" data-accion="guardar" data-id="${p.id}">💾</button>
-          <button class="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition" data-accion="eliminar" data-id="${p.id}">🗑️</button>
-          <button class="px-3 py-1 rounded ${p.activo ? 'bg-brandy-500' : 'bg-gray-400'} text-white hover:bg-brandy-600 transition" data-accion="toggle-activo" data-id="${p.id}">${p.activo ? 'Activo' : 'Inactivo'}</button>
+          <button class="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-1" data-accion="guardar" data-id="${p.id}" title="Guardar cambios"><span class="material-icons">save</span></button>
+          <button class="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition flex items-center gap-1" data-accion="eliminar" data-id="${p.id}" title="Eliminar producto"><span class="material-icons">delete</span></button>
+          <button class="px-3 py-1 rounded ${p.activo ? 'bg-brandy-600' : 'bg-gray-400'} text-white hover:bg-brandy-700 transition flex items-center gap-1" data-accion="toggle-activo" data-id="${p.id}" title="${p.activo ? 'Ocultar del catálogo' : 'Mostrar en catálogo'}"><span class="material-icons">${p.activo ? 'visibility' : 'visibility_off'}</span></button>
         </div>
         <div class="text-xs text-center mt-1 text-brandy-500 dark:text-brandy-200">ID: ${p.id}</div>
         <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">${p.categoria ? p.categoria.nombre : ''}</div>
-        <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">${p.materiales || ''}</div>
         <div class="text-xs text-center mt-1 text-brandy-400 dark:text-brandy-300">${p.fechaCreacion ? new Date(p.fechaCreacion).toLocaleDateString() : ''}</div>
         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" id="feedback-${p.id}"></div>
       </div>
@@ -441,6 +461,7 @@ if (window.location.pathname.endsWith('admin.html')) {
       const descripcion = card.querySelector('[data-field="descripcion"]').value;
       const precio = card.querySelector('[data-field="precio"]').value;
       const stock = card.querySelector('[data-field="stock"]').value;
+      const materiales = card.querySelector('[data-field="materiales"]').value;
       const feedback = card.querySelector(`#feedback-${id}`);
       feedback.textContent = 'Guardando...';
       feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
@@ -448,16 +469,19 @@ if (window.location.pathname.endsWith('admin.html')) {
         const res = await fetch(`${API_URL}/admin/productos/${id}`, {
           method: 'PUT',
           headers: {
+            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + jwt
           },
-          body: JSON.stringify({ nombre, descripcion, precio, stock })
+          body: JSON.stringify({ nombre, descripcion, precio, stock, materiales })
         });
+        if (res.status === 409) throw new Error('Ya existe un producto con ese nombre');
         if (!res.ok) throw new Error('Error al guardar');
         feedback.textContent = '✔️';
         feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
         setTimeout(() => feedback.textContent = '', 1200);
+        cargarProductos();
       } catch (err) {
-        feedback.textContent = 'Error';
+        feedback.textContent = err.message || 'Error';
         feedback.className = 'text-red-600 dark:text-red-400';
       }
     };
@@ -487,7 +511,8 @@ if (window.location.pathname.endsWith('admin.html')) {
       feedback.textContent = 'Actualizando...';
       feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
       try {
-        const res = await fetch(`${API_URL}/admin/productos/${id}/toggle-activo`, {
+        const activo = !card.querySelector('[data-accion="toggle-activo"]').classList.contains('bg-brandy-600');
+        const res = await fetch(`${API_URL}/admin/productos/${id}/estado?activo=${activo}`, {
           method: 'PATCH',
           headers: { 'Authorization': 'Bearer ' + jwt }
         });

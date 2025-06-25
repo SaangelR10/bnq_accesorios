@@ -49,10 +49,12 @@ public class SecurityConfig {
                     "/catalogo.html",
                     "/sobre.html",
                     "/admin.html",
+                    "/favicon.ico",
                     "/output.css",
                     "/js/**",
                     "/img/**",
                     "/css/**",
+                    "/node_modules/**",
                     "/api/auth/login",
                     "/api/auth/register"
                 ).permitAll()
@@ -60,7 +62,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/categorias").permitAll()
                 .requestMatchers("/api/categorias/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.function.Function;
+import com.bnqaccesorios.model.Usuario;
+import com.bnqaccesorios.model.Rol;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Component
 public class JwtUtil {
@@ -18,11 +22,15 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long jwtExpirationInMs;
 
-    public String generateToken(String username) {
+    public String generateToken(Usuario usuario) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+        List<String> roles = usuario.getRoles().stream()
+            .map(r -> r.getNombre().startsWith("ROLE_") ? r.getNombre() : "ROLE_" + r.getNombre())
+            .collect(Collectors.toList());
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(usuario.getEmail())
+                .claim("roles", roles)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, secret)
@@ -42,7 +50,7 @@ public class JwtUtil {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)

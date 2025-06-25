@@ -22,7 +22,7 @@ public class CategoriaController {
     }
 
     // Endpoints admin
-    @PostMapping
+    @PostMapping(consumes = {"application/json", "application/x-www-form-urlencoded"})
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Categoria> crearCategoria(@RequestBody Categoria categoria) {
         return ResponseEntity.ok(categoriaService.crearCategoria(categoria));

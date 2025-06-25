@@ -40,7 +40,7 @@ public class AuthService {
         usuario.setTelefono(telefono);
         usuario.setRoles(Collections.singleton(rolUser));
         usuarioRepository.save(usuario);
-        return jwtUtil.generateToken(email);
+        return jwtUtil.generateToken(usuario);
     }
 
     public String login(String email, String password) {
@@ -48,6 +48,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(email, password)
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return jwtUtil.generateToken(email);
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow();
+        return jwtUtil.generateToken(usuario);
     }
 } 
