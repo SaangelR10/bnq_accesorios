@@ -68,10 +68,13 @@ if (showRegister && showLogin && loginForm && registerForm) {
       if (!res.ok) throw new Error('Credenciales incorrectas');
       const data = await res.json();
       localStorage.setItem('jwt', data.token);
+      // Obtener userId y migrar carrito
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + data.token } })
+        .then(res => res.ok ? res.json() : null)
+        .then(user => { if (user && user.id) migrarCarritoAlIniciarSesion(user.id); });
       window.usuarioLogueado = true;
       messageDiv.textContent = '¡Inicio de sesión exitoso!';
       messageDiv.className = 'mb-4 text-center text-sm text-green-600 dark:text-green-400';
-      // Redirigir o recargar después de un tiempo
       setTimeout(() => location.href = 'index.html', 1200);
     } catch (err) {
       messageDiv.textContent = err.message || 'Error al iniciar sesión';
@@ -98,6 +101,10 @@ if (showRegister && showLogin && loginForm && registerForm) {
       if (!res.ok) throw new Error('Error al registrar cuenta');
       const data = await res.json();
       localStorage.setItem('jwt', data.token);
+      // Obtener userId y migrar carrito
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + data.token } })
+        .then(res => res.ok ? res.json() : null)
+        .then(user => { if (user && user.id) migrarCarritoAlIniciarSesion(user.id); });
       window.usuarioLogueado = true;
       messageDiv.textContent = '¡Registro exitoso!';
       messageDiv.className = 'mb-4 text-center text-sm text-green-600 dark:text-green-400';
@@ -391,12 +398,13 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     if (window.actualizarContadorCarrito) window.actualizarContadorCarrito();
   }
   if (finalizarCompra) finalizarCompra.onclick = () => {
-    if (!carrito.length) return;
+    let carritoActual = window.carrito || JSON.parse(localStorage.getItem(window.carritoKey || 'carrito')) || [];
+    if (!carritoActual.length) return;
     let mensaje = '¡Hola! Quiero hacer un pedido:%0A';
-    carrito.forEach(item => {
+    carritoActual.forEach(item => {
       mensaje += `- ${item.nombre} x${item.cantidad} (${formatoCOP(item.precio * item.cantidad)})%0A`;
     });
-    mensaje += `%0ATotal: ${formatoCOP(carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
+    mensaje += `%0ATotal: ${formatoCOP(carritoActual.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
     window.open(`https://wa.me/57321938510?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
@@ -611,13 +619,13 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     };
   }
   if (finalizarCompra) finalizarCompra.onclick = () => {
-    if (!carrito.length) return;
+    let carritoActual = window.carrito || JSON.parse(localStorage.getItem(window.carritoKey || 'carrito')) || [];
+    if (!carritoActual.length) return;
     let mensaje = '¡Hola! Quiero hacer un pedido:%0A';
-    carrito.forEach(item => {
+    carritoActual.forEach(item => {
       mensaje += `- ${item.nombre} x${item.cantidad} (${formatoCOP(item.precio * item.cantidad)})%0A`;
     });
-    mensaje += `%0ATotal: ${formatoCOP(carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
-    // Redirigir correctamente a WhatsApp
+    mensaje += `%0ATotal: ${formatoCOP(carritoActual.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
     window.open(`https://wa.me/57321938510?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
@@ -1267,7 +1275,18 @@ if (window.location.pathname.endsWith('admin.html')) {
       const feedback = card.querySelector(`#feedback-${id}`);
       feedback.textContent = 'Guardando...';
       feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
-      // ... existing code para obtener datos ...
+      // Obtener datos actualizados del producto
+      const nombre = card.querySelector(`#nombre-${id}`).value.trim();
+      const descripcion = card.querySelector(`#descripcion-${id}`).value.trim();
+      const precio = parseFloat(card.querySelector(`#precio-${id}`).value);
+      const stock = parseInt(card.querySelector(`#stock-${id}`).value);
+      const materiales = card.querySelector(`#materiales-${id}`).value.trim();
+      const categoriaId = card.querySelector(`#categoria-${id}`).value;
+      if (!nombre || !descripcion || isNaN(precio) || isNaN(stock) || !categoriaId) {
+        feedback.textContent = 'Completa todos los campos obligatorios.';
+        feedback.className = 'text-red-600 dark:text-red-400';
+        return;
+      }
       try {
         const formData = new FormData();
         formData.append('producto', JSON.stringify({ nombre, descripcion, precio, stock, materiales }));
@@ -1279,9 +1298,18 @@ if (window.location.pathname.endsWith('admin.html')) {
           headers: { 'Authorization': 'Bearer ' + jwt },
           body: formData
         });
-        // ... existing code ...
+        if (!res.ok) throw new Error('Error al guardar cambios');
+        feedback.textContent = '¡Producto actualizado!';
+        feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
+        // Limpiar arrays y recargar productos
+        nuevasImagenes = [];
+        imagenesAEliminar = [];
+        await cargarProductos();
+        if (typeof cargarProductosTabla === 'function') await cargarProductosTabla();
+        setTimeout(() => { feedback.textContent = ''; }, 2000);
       } catch (err) {
-        // ... existing code ...
+        feedback.textContent = err.message || 'Error al guardar cambios';
+        feedback.className = 'text-red-600 dark:text-red-400';
       }
     };
     // ... existing code ...
@@ -1743,6 +1771,10 @@ if (showRegister && showLogin && loginForm && registerForm) {
       if (!res.ok) throw new Error('Credenciales incorrectas');
       const data = await res.json();
       localStorage.setItem('jwt', data.token);
+      // Obtener userId y migrar carrito
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + data.token } })
+        .then(res => res.ok ? res.json() : null)
+        .then(user => { if (user && user.id) migrarCarritoAlIniciarSesion(user.id); });
       window.usuarioLogueado = true;
       messageDiv.textContent = '¡Inicio de sesión exitoso!';
       messageDiv.className = 'mb-4 text-center text-sm text-green-600 dark:text-green-400';
@@ -1760,6 +1792,10 @@ if (showRegister && showLogin && loginForm && registerForm) {
       if (!res.ok) throw new Error('Error al registrar cuenta');
       const data = await res.json();
       localStorage.setItem('jwt', data.token);
+      // Obtener userId y migrar carrito
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + data.token } })
+        .then(res => res.ok ? res.json() : null)
+        .then(user => { if (user && user.id) migrarCarritoAlIniciarSesion(user.id); });
       window.usuarioLogueado = true;
       messageDiv.textContent = '¡Registro exitoso!';
       messageDiv.className = 'mb-4 text-center text-sm text-green-600 dark:text-green-400';
@@ -1770,3 +1806,13 @@ if (showRegister && showLogin && loginForm && registerForm) {
   });
 }
 // ... existing code ...
+
+// Migrar carrito de visitante al iniciar sesión
+function migrarCarritoAlIniciarSesion(userId) {
+  const carritoVisitante = localStorage.getItem('carrito');
+  const carritoUsuarioKey = `carrito_${userId}`;
+  if (carritoVisitante && !localStorage.getItem(carritoUsuarioKey)) {
+    localStorage.setItem(carritoUsuarioKey, carritoVisitante);
+    localStorage.removeItem('carrito');
+  }
+}
