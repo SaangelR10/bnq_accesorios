@@ -224,7 +224,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
   function abrirModalDetalle(producto) {
     modalContent.innerHTML = `
       <div class="flex flex-col md:flex-row gap-8 items-center">
-        <img src="${(producto.imagenes && producto.imagenes.length > 0) ? `/imagenes_productos/${producto.imagenes[0].url}` : 'img/no-image.png'}" alt="${producto.nombre}" class="h-60 w-60 object-cover rounded-xl shadow mb-4 md:mb-0">
+        <img src="${(producto.imagenes && producto.imagenes.length > 0) ? producto.imagenes[0].url : 'img/no-image.png'}" alt="${producto.nombre}" class="h-60 w-60 object-cover rounded-xl shadow mb-4 md:mb-0">
         <div class="flex-1 flex flex-col gap-2">
           <h2 class="text-3xl font-bold text-brandy-700 dark:text-brandy-100 mb-2">${producto.nombre}</h2>
           <p class="text-brandy-600 dark:text-brandy-200 mb-2">${producto.descripcion}</p>
@@ -293,7 +293,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
         id: producto.id,
         nombre: producto.nombre,
         precio: producto.precio,
-        imagen: (producto.imagenes && producto.imagenes.length > 0) ? `/imagenes_productos/${producto.imagenes[0].url}` : 'img/no-image.png',
+        imagen: (producto.imagenes && producto.imagenes.length > 0) ? producto.imagenes[0].url : 'img/no-image.png',
         cantidad: Math.min(cantidad, producto.stock),
         stock: producto.stock
       });
@@ -417,7 +417,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       return;
     }
     productosContainer.innerHTML = productosFiltrados.map(p => {
-      const img = (p.imagenes && p.imagenes.length > 0) ? `/imagenes_productos/${p.imagenes[0].url}` : 'img/no-image.png';
+      const img = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].url : 'img/no-image.png';
       return `
         <div class="producto-card bg-white dark:bg-brandy-800 rounded-lg shadow p-6 flex flex-col items-center cursor-pointer transition hover:scale-105" data-id="${p.id}">
           <img src="${img}" alt="${p.nombre}" class="h-40 w-40 object-cover rounded mb-4">
@@ -1089,7 +1089,7 @@ if (window.location.pathname.endsWith('admin.html')) {
   }
 
   function renderProductoCard(p) {
-    const img = (p.imagenes && p.imagenes.length > 0) ? `/imagenes_productos/${p.imagenes[0].url}` : 'img/no-image.png';
+    const img = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].url : 'img/no-image.png';
     const cats = window._categoriasAdmin || [];
     
     return `
@@ -1340,7 +1340,7 @@ if (window.location.pathname.endsWith('admin.html')) {
       const productos = await res.json();
       
       tablaProductos.innerHTML = productos.map(p => {
-        const img = (p.imagenes && p.imagenes.length > 0) ? `/imagenes_productos/${p.imagenes[0].url}` : 'img/no-image.png';
+        const img = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].url : 'img/no-image.png';
         const estado = p.activo ? 
           '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Activo</span>' : 
           '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>';
