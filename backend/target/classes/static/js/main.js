@@ -1254,6 +1254,25 @@ if (window.location.pathname.endsWith('admin.html')) {
         this.parentElement.remove();
       };
     });
+    // Evento para eliminar producto desde la tarjeta
+    const btnEliminar = card.querySelector('[data-accion="eliminar"]');
+    if (btnEliminar) {
+      btnEliminar.onclick = async () => {
+        if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
+        try {
+          const res = await fetch(`${API_URL}/admin/productos/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + jwt }
+          });
+          if (!res.ok) throw new Error('Error al eliminar producto');
+          await cargarProductos();
+          if (typeof cargarProductosTabla === 'function') await cargarProductosTabla();
+          alert('Producto eliminado exitosamente');
+        } catch (err) {
+          alert('Error al eliminar producto: ' + (err.message || ''));
+        }
+      };
+    }
     // Lógica para previsualizar nuevas imágenes
     let nuevasImagenes = [];
     const inputNuevas = card.querySelector('.input-nuevas-imagenes');
