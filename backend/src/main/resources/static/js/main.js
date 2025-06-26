@@ -626,7 +626,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       mensaje += `- ${item.nombre} x${item.cantidad} (${formatoCOP(item.precio * item.cantidad)})%0A`;
     });
     mensaje += `%0ATotal: ${formatoCOP(carritoActual.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
-    window.open(`https://wa.me/57321938510?text=${encodeURIComponent(mensaje)}`, '_blank');
+    window.open(`https://wa.me/573219238510?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
   // Inicializar contador al cargar la página
