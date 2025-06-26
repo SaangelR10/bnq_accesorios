@@ -648,6 +648,12 @@ if (window.location.pathname.endsWith('catalogo.html')) {
 if (window.location.pathname.endsWith('admin.html')) {
   // --- Utilidades ---
   const jwt = localStorage.getItem('jwt');
+  if (!jwt) {
+    alert('No hay sesión activa. Por favor, inicia sesión para usar el panel de administración.');
+    // Opcional: redirigir a login
+    window.location.href = '/cuenta.html';
+    throw new Error('No hay JWT');
+  }
   const API_URL = '/api';
   const form = document.getElementById('producto-form');
   const dropArea = document.getElementById('drop-area');
@@ -1298,7 +1304,14 @@ if (window.location.pathname.endsWith('admin.html')) {
           headers: { 'Authorization': 'Bearer ' + jwt },
           body: formData
         });
-        if (!res.ok) throw new Error('Error al guardar cambios');
+        if (!res.ok) {
+          let errorMsg = 'Error al guardar cambios';
+          try {
+            const errorText = await res.text();
+            if (errorText) errorMsg = errorText;
+          } catch {}
+          throw new Error(errorMsg);
+        }
         feedback.textContent = '¡Producto actualizado!';
         feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
         // Limpiar arrays y recargar productos
@@ -1306,6 +1319,26 @@ if (window.location.pathname.endsWith('admin.html')) {
         imagenesAEliminar = [];
         await cargarProductos();
         if (typeof cargarProductosTabla === 'function') await cargarProductosTabla();
+        // --- Actualizar carrito si el producto editado está en el carrito ---
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        let modificado = false;
+        carrito = carrito.map(item => {
+          if (item.id == id) {
+            modificado = true;
+            return {
+              ...item,
+              nombre,
+              precio,
+              stock,
+              imagen: (nuevasImagenes.length > 0 ? '' : item.imagen) // Si hay nuevas imágenes, se actualizará al recargar
+            };
+          }
+          return item;
+        });
+        if (modificado) {
+          localStorage.setItem('carrito', JSON.stringify(carrito));
+          if (typeof actualizarContadorCarrito === 'function') actualizarContadorCarrito();
+        }
         setTimeout(() => { feedback.textContent = ''; }, 2000);
       } catch (err) {
         feedback.textContent = err.message || 'Error al guardar cambios';
