@@ -7,6 +7,7 @@ import com.bnqaccesorios.repository.CategoriaRepository;
 import com.bnqaccesorios.repository.ImagenProductoRepository;
 import com.bnqaccesorios.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,8 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
     private final ImagenProductoRepository imagenProductoRepository;
+    @Autowired
+    private S3Service s3Service;
 
     private final String uploadDir = "uploads/imagenes_productos/";
 
@@ -110,6 +113,11 @@ public class ProductoService {
     public void eliminarProducto(Long id) {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        // Borrar imágenes de S3 antes de eliminar el producto
+        List<ImagenProducto> imagenes = imagenProductoRepository.findByProductoId(id);
+        for (ImagenProducto img : imagenes) {
+            s3Service.deleteFile(img.getUrl());
+        }
         productoRepository.delete(producto);
     }
 
@@ -123,14 +131,12 @@ public class ProductoService {
 
     private void guardarImagenes(Producto producto, List<MultipartFile> imagenes) throws IOException {
         if (imagenes == null || imagenes.isEmpty()) return;
-        Files.createDirectories(Paths.get(uploadDir));
         List<ImagenProducto> imagenesGuardadas = new ArrayList<>();
         for (MultipartFile file : imagenes) {
-            String nombreArchivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path ruta = Paths.get(uploadDir + nombreArchivo);
-            Files.write(ruta, file.getBytes());
+            // Subir a S3 y obtener URL pública
+            String url = s3Service.uploadFile(file);
             ImagenProducto img = new ImagenProducto();
-            img.setUrl(nombreArchivo);
+            img.setUrl(url);
             img.setProducto(producto);
             imagenProductoRepository.save(img);
             imagenesGuardadas.add(img);
