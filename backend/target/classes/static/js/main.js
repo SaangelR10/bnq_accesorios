@@ -68,6 +68,7 @@ if (showRegister && showLogin && loginForm && registerForm) {
       if (!res.ok) throw new Error('Credenciales incorrectas');
       const data = await res.json();
       localStorage.setItem('jwt', data.token);
+      window.usuarioLogueado = true;
       messageDiv.textContent = '¡Inicio de sesión exitoso!';
       messageDiv.className = 'mb-4 text-center text-sm text-green-600 dark:text-green-400';
       // Redirigir o recargar después de un tiempo
@@ -97,6 +98,7 @@ if (showRegister && showLogin && loginForm && registerForm) {
       if (!res.ok) throw new Error('Error al registrar cuenta');
       const data = await res.json();
       localStorage.setItem('jwt', data.token);
+      window.usuarioLogueado = true;
       messageDiv.textContent = '¡Registro exitoso!';
       messageDiv.className = 'mb-4 text-center text-sm text-green-600 dark:text-green-400';
       setTimeout(() => location.href = 'index.html', 1200);
@@ -480,32 +482,32 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     }
     productosContainer.innerHTML = productosFiltrados.map(p => {
       const imagenes = (p.imagenes && p.imagenes.length > 0) ? p.imagenes : [{url:'img/no-image.png'}];
-      // Galería de imágenes con flechas si hay varias
-      let galeria = `<div class='relative w-40 h-40 mx-auto group'>
-        <img src='${imagenes[0].url}' alt='${p.nombre}' class='h-40 w-40 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700 galeria-img' data-index='0' data-id='${p.id}'>`;
+      // Galería de imágenes con flechas y miniaturas
+      let galeria = `<div class='relative w-full h-48 flex flex-col items-center group mb-2'>
+        <img src='${imagenes[0].url}' alt='${p.nombre}' class='h-40 w-40 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700 galeria-img' data-index='0' data-id='${p.id} cursor-pointer'>`;
       if(imagenes.length > 1) {
-        galeria += `<button class='absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-prev hidden group-hover:block' data-id='${p.id}'>&lt;</button>
-        <button class='absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-next hidden group-hover:block' data-id='${p.id}'>&gt;</button>`;
+        galeria += `<button class='absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-prev hidden group-hover:block' data-id='${p.id}'>&lt;</button>
+        <button class='absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-next hidden group-hover:block' data-id='${p.id}'>&gt;</button>`;
       }
       galeria += `<div class='flex gap-1 justify-center mt-2'>`;
       imagenes.forEach((img, idx) => {
         galeria += `<button class='w-3 h-3 rounded-full border-2 ${idx===0?'bg-brandy-500 border-brandy-700':'bg-white border-brandy-300'} galeria-dot' data-id='${p.id}' data-idx='${idx}'></button>`;
       });
       galeria += `</div></div>`;
-      // Selector de cantidad y botón agregar al carrito
-      let controls = `<div class='flex items-center gap-2 mt-4'>
+      // Selector de cantidad y botón agregar al carrito bien organizados
+      let controls = `<div class='flex items-center gap-2 mt-2 justify-center'>
         <input type='number' min='1' max='${p.stock}' value='1' class='w-16 p-2 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500 cantidad-input' data-id='${p.id}'>
         <button class='bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition agregar-carrito-btn' data-id='${p.id}'>Agregar al carrito</button>
       </div>`;
       return `
-        <div class="producto-card bg-white dark:bg-brandy-800 rounded-lg shadow p-6 flex flex-col items-center transition hover:scale-105 group" data-id="${p.id}">
+        <div class="producto-card bg-white dark:bg-brandy-800 rounded-lg shadow p-6 flex flex-col items-center transition hover:scale-105 group w-full max-w-xs mx-auto mb-6" data-id="${p.id}">
           ${galeria}
-          <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2 mt-4 text-center">${p.nombre}</h2>
+          <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2 mt-2 text-center">${p.nombre}</h2>
           <p class="text-brandy-600 dark:text-brandy-200 mb-2 text-center">${p.descripcion}</p>
-          <span class="text-brandy-500 font-bold text-lg mb-2">${formatoCOP(p.precio)}</span>
+          <span class="text-brandy-500 font-bold text-lg mb-1">${formatoCOP(p.precio)}</span>
           <span class="text-sm text-brandy-400 dark:text-brandy-300 mb-2">Stock: ${p.stock}</span>
           ${controls}
-          <button class="bg-brandy-200 text-brandy-700 px-3 py-1 rounded hover:bg-brandy-300 transition ver-detalle mt-2" data-id="${p.id}">Ver detalles</button>
+          <button class="bg-brandy-200 text-brandy-700 px-3 py-1 rounded hover:bg-brandy-300 transition ver-detalle mt-2 w-full" data-id="${p.id}">Ver detalles</button>
         </div>
       `;
     }).join('');
@@ -1786,4 +1788,61 @@ document.addEventListener('DOMContentLoaded', function () {
       // ... existing code ...
     });
 });
+// ... existing code ...
+
+// Solución bug login persistente: actualizar window.usuarioLogueado tras login/registro y al cargar la página
+function actualizarEstadoLogin() {
+  const jwt = localStorage.getItem('jwt');
+  if (!jwt) {
+    window.usuarioLogueado = false;
+    return;
+  }
+  fetch('/api/auth/me', {
+    headers: { 'Authorization': 'Bearer ' + jwt }
+  })
+    .then(res => res.ok ? res.json() : null)
+    .then(user => {
+      window.usuarioLogueado = !!(user && user.roles);
+    })
+    .catch(() => { window.usuarioLogueado = false; });
+}
+actualizarEstadoLogin();
+// Tras login/registro exitoso, actualizar estado login antes de recargar
+if (showRegister && showLogin && loginForm && registerForm) {
+  // ... existing code ...
+  loginForm.addEventListener('submit', async (e) => {
+    // ... existing code ...
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        // ... existing code ...
+      });
+      if (!res.ok) throw new Error('Credenciales incorrectas');
+      const data = await res.json();
+      localStorage.setItem('jwt', data.token);
+      window.usuarioLogueado = true;
+      messageDiv.textContent = '¡Inicio de sesión exitoso!';
+      messageDiv.className = 'mb-4 text-center text-sm text-green-600 dark:text-green-400';
+      setTimeout(() => location.href = 'index.html', 1200);
+    } catch (err) {
+      // ... existing code ...
+    }
+  });
+  registerForm.addEventListener('submit', async (e) => {
+    // ... existing code ...
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+        // ... existing code ...
+      });
+      if (!res.ok) throw new Error('Error al registrar cuenta');
+      const data = await res.json();
+      localStorage.setItem('jwt', data.token);
+      window.usuarioLogueado = true;
+      messageDiv.textContent = '¡Registro exitoso!';
+      messageDiv.className = 'mb-4 text-center text-sm text-green-600 dark:text-green-400';
+      setTimeout(() => location.href = 'index.html', 1200);
+    } catch (err) {
+      // ... existing code ...
+    }
+  });
+}
 // ... existing code ...
