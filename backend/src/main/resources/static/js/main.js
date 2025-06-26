@@ -357,7 +357,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       mensaje += `- ${item.nombre} x${item.cantidad} (${formatoCOP(item.precio * item.cantidad)})%0A`;
     });
     mensaje += `%0ATotal: ${formatoCOP(carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
-    window.open(`https://wa.me/573001112233?text=${encodeURIComponent(mensaje)}`, '_blank');
+    window.open(`https://wa.me/57321938510?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
   // Click en cualquier parte del producto para ver detalles
@@ -542,7 +542,7 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     });
     mensaje += `%0ATotal: ${formatoCOP(carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0))}`;
     // Redirigir correctamente a WhatsApp
-    window.open(`https://wa.me/573001112233?text=${encodeURIComponent(mensaje)}`, '_blank');
+    window.open(`https://wa.me/57321938510?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
   // Inicializar contador al cargar la página
@@ -669,7 +669,7 @@ if (window.location.pathname.endsWith('admin.html')) {
     formData.append('producto', JSON.stringify(producto));
     formData.append('categoriaId', categoriaId);
     if (imagenesSeleccionadas.length > 0) {
-      imagenesSeleccionadas.forEach(img => formData.append('imagenes', img));
+    imagenesSeleccionadas.forEach(img => formData.append('imagenes', img));
     }
     // DEBUG: Mostrar el contenido real del FormData antes de enviar
     for (let pair of formData.entries()) {
@@ -1238,35 +1238,35 @@ if (window.location.pathname.endsWith('admin.html')) {
   const categoriaFormMsg = document.getElementById('categoria-form-msg');
 
   categoriaForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    categoriaFormMsg.textContent = 'Creando categoría...';
-    categoriaFormMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
+      e.preventDefault();
+      categoriaFormMsg.textContent = 'Creando categoría...';
+      categoriaFormMsg.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
     
-    try {
-      const res = await fetch(`${API_URL}/categorias`, {
-        method: 'POST',
-        headers: { 
-          'Authorization': 'Bearer ' + jwt,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ nombre: nombreCategoriaInput.value })
-      });
+      try {
+        const res = await fetch(`${API_URL}/categorias`, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + jwt,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nombre: nombreCategoriaInput.value })
+        });
       
-      if (!res.ok) throw new Error('Error al crear categoría');
+        if (!res.ok) throw new Error('Error al crear categoría');
       
-      categoriaFormMsg.textContent = '¡Categoría creada!';
-      categoriaFormMsg.className = 'text-green-600 dark:text-green-400 animate-bounce';
-      categoriaForm.reset();
+        categoriaFormMsg.textContent = '¡Categoría creada!';
+        categoriaFormMsg.className = 'text-green-600 dark:text-green-400 animate-bounce';
+        categoriaForm.reset();
       
       // Recargar categorías
       await cargarCategorias();
       await cargarCategoriasAdmin();
       
-    } catch (err) {
-      categoriaFormMsg.textContent = err.message || 'Error al crear categoría';
-      categoriaFormMsg.className = 'text-red-600 dark:text-red-400';
-    }
-  });
+      } catch (err) {
+        categoriaFormMsg.textContent = err.message || 'Error al crear categoría';
+        categoriaFormMsg.className = 'text-red-600 dark:text-red-400';
+      }
+    });
 
   async function cargarCategoriasAdmin() {
     try {
