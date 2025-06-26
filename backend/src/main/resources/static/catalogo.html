@@ -63,11 +63,11 @@
   </header>
 
   <!-- Contenido principal -->
-  <main class="flex-1 flex flex-col items-center justify-center pt-32 pb-12">
-    <h1 class="text-4xl md:text-5xl font-bold text-brandy-700 dark:text-brandy-100 mb-4 tracking-widest">Catálogo</h1>
+  <main class="flex-1 flex flex-col items-center justify-center pt-32 pb-12 w-full px-2 sm:px-4">
+    <h1 class="text-4xl md:text-5xl font-bold text-brandy-700 dark:text-brandy-100 mb-4 tracking-widest text-center">Catálogo</h1>
     <p class="text-lg text-brandy-800 dark:text-brandy-200 mb-8 text-center max-w-xl">Explora nuestra colección de accesorios artesanales. Pronto verás los productos aquí.</p>
-    <div id="filtro-categorias" class="sticky top-24 z-20 flex gap-2 mb-8 bg-white/80 dark:bg-brandy-900/80 backdrop-blur px-4 py-2 rounded-lg shadow"></div>
-    <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl px-4"></div>
+    <div id="filtro-categorias" class="sticky top-24 z-20 flex flex-wrap gap-2 mb-8 bg-white/80 dark:bg-brandy-900/80 backdrop-blur px-4 py-2 rounded-lg shadow justify-center"></div>
+    <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-6xl px-2"></div>
     <div id="productos-msg" class="text-center text-brandy-700 dark:text-brandy-100 mt-8"></div>
     <!-- Modal de detalles de producto -->
     <div id="modal-detalle" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden transition-all">
