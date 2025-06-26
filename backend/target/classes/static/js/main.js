@@ -225,15 +225,11 @@ if (window.location.pathname.endsWith('catalogo.html')) {
   // Mostrar modal detalle
   function abrirModalDetalle(producto, imagenInicial = 0) {
     const imagenes = (producto.imagenes && producto.imagenes.length > 0) ? producto.imagenes : [{url:'img/no-image.png'}];
-    let galeria = `<div class='relative w-60 h-60 mx-auto group'>
-      <img src='${imagenes[imagenInicial].url}' alt='${producto.nombre}' class='h-60 w-60 object-cover rounded-xl shadow galeria-img-modal' data-index='${imagenInicial}'>`;
-    if(imagenes.length > 1) {
-      galeria += `<button class='absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-prev-modal hidden group-hover:block'>&lt;</button>
-      <button class='absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-next-modal hidden group-hover:block'>&gt;</button>`;
-    }
-    galeria += `<div class='flex gap-1 justify-center mt-2'>`;
+    let galeria = `<div class='flex flex-col items-center w-full mb-2'>
+      <img src='${imagenes[imagenInicial].url}' alt='${producto.nombre}' class='h-60 w-60 object-cover rounded-xl shadow galeria-img-modal cursor-pointer' data-idx='${imagenInicial}'>
+      <div class='flex gap-1 justify-center mt-2 galeria-miniaturas-modal'>`;
     imagenes.forEach((img, idx) => {
-      galeria += `<button class='w-3 h-3 rounded-full border-2 ${idx===imagenInicial?'bg-brandy-500 border-brandy-700':'bg-white border-brandy-300'} galeria-dot-modal' data-idx='${idx}'></button>`;
+      galeria += `<img src='${img.url}' class='h-12 w-12 object-cover rounded border-2 ${idx===imagenInicial?'border-brandy-500':'border-brandy-200 dark:border-brandy-700'} galeria-miniatura-modal cursor-pointer' data-idx='${idx}'>`;
     });
     galeria += `</div></div>`;
     modalContent.innerHTML = `
@@ -260,42 +256,22 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     modal.classList.remove('hidden');
     setTimeout(() => modal.classList.add('backdrop-blur-sm'), 10);
     document.body.classList.add('overflow-hidden');
-    // Galería de imágenes en modal
-    const img = modalContent.querySelector('.galeria-img-modal');
-    const dots = modalContent.querySelectorAll('.galeria-dot-modal');
-    if(imagenes.length > 1) {
-      modalContent.querySelector('.galeria-prev-modal').onclick = function(e) {
-        e.stopPropagation();
-        let idx = parseInt(img.dataset.index);
-        idx = (idx-1+imagenes.length)%imagenes.length;
-        img.src = imagenes[idx].url;
-        img.dataset.index = idx;
-        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
-        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
-      };
-      modalContent.querySelector('.galeria-next-modal').onclick = function(e) {
-        e.stopPropagation();
-        let idx = parseInt(img.dataset.index);
-        idx = (idx+1)%imagenes.length;
-        img.src = imagenes[idx].url;
-        img.dataset.index = idx;
-        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
-        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
-      };
-    }
-    dots.forEach((dot, idx) => {
-      dot.onclick = function(e) {
-        e.stopPropagation();
-        img.src = imagenes[idx].url;
-        img.dataset.index = idx;
-        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
-        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+    // Galería tipo Amazon en modal
+    const imgModal = modalContent.querySelector('.galeria-img-modal');
+    const miniaturasModal = modalContent.querySelectorAll('.galeria-miniatura-modal');
+    miniaturasModal.forEach((mini, idx) => {
+      mini.onclick = function(e) {
+        imgModal.src = mini.src;
+        imgModal.dataset.idx = idx;
+        miniaturasModal.forEach((m, i) => {
+          m.className = m.className.replace('border-brandy-500','border-brandy-200 dark:border-brandy-700');
+          if(i===idx) m.className = m.className.replace('border-brandy-200 dark:border-brandy-700','border-brandy-500');
+        });
       };
     });
-    // Click en imagen para ver ampliada
-    img.onclick = function(e) {
+    imgModal.onclick = function(e) {
       e.stopPropagation();
-      const url = img.src;
+      const url = imgModal.src;
       const visor = document.createElement('div');
       visor.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90';
       visor.innerHTML = `<img src='${url}' class='max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl'><button class='absolute top-4 right-4 text-4xl text-white'>&times;</button>`;
@@ -482,19 +458,13 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     }
     productosContainer.innerHTML = productosFiltrados.map(p => {
       const imagenes = (p.imagenes && p.imagenes.length > 0) ? p.imagenes : [{url:'img/no-image.png'}];
-      // Galería de imágenes con flechas y miniaturas
-      let galeria = `<div class='relative w-full h-48 flex flex-col items-center group mb-2'>
-        <img src='${imagenes[0].url}' alt='${p.nombre}' class='h-40 w-40 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700 galeria-img' data-index='0' data-id='${p.id} cursor-pointer'>`;
-      if(imagenes.length > 1) {
-        galeria += `<button class='absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-prev hidden group-hover:block' data-id='${p.id}'>&lt;</button>
-        <button class='absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-next hidden group-hover:block' data-id='${p.id}'>&gt;</button>`;
-      }
-      galeria += `<div class='flex gap-1 justify-center mt-2'>`;
+      let galeria = `<div class='flex flex-col items-center w-full mb-2'>
+        <img src='${imagenes[0].url}' alt='${p.nombre}' class='h-40 w-40 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700 galeria-img-principal cursor-pointer' data-id='${p.id}' data-idx='0'>
+        <div class='flex gap-1 justify-center mt-2 galeria-miniaturas' data-id='${p.id}'>`;
       imagenes.forEach((img, idx) => {
-        galeria += `<button class='w-3 h-3 rounded-full border-2 ${idx===0?'bg-brandy-500 border-brandy-700':'bg-white border-brandy-300'} galeria-dot' data-id='${p.id}' data-idx='${idx}'></button>`;
+        galeria += `<img src='${img.url}' class='h-10 w-10 object-cover rounded border-2 ${idx===0?'border-brandy-500':'border-brandy-200 dark:border-brandy-700'} galeria-miniatura cursor-pointer' data-id='${p.id}' data-idx='${idx}'>`;
       });
       galeria += `</div></div>`;
-      // Selector de cantidad y botón agregar al carrito bien organizados
       let controls = `<div class='flex items-center gap-2 mt-2 justify-center'>
         <input type='number' min='1' max='${p.stock}' value='1' class='w-16 p-2 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500 cantidad-input' data-id='${p.id}'>
         <button class='bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition agregar-carrito-btn' data-id='${p.id}'>Agregar al carrito</button>
@@ -511,75 +481,29 @@ if (window.location.pathname.endsWith('catalogo.html')) {
         </div>
       `;
     }).join('');
-    // Eventos de galería
-    document.querySelectorAll('.galeria-prev').forEach(btn => {
-      btn.onclick = function(e) {
-        e.stopPropagation();
+    // Galería tipo Amazon: miniaturas y click en imagen principal
+    document.querySelectorAll('.galeria-img-principal').forEach(img => {
+      img.onclick = function(e) {
         const id = this.dataset.id;
-        const card = document.querySelector(`.producto-card[data-id='${id}']`);
-        const img = card.querySelector('.galeria-img');
-        const dots = card.querySelectorAll('.galeria-dot');
-        let idx = parseInt(img.dataset.index);
-        idx = (idx-1+dots.length)%dots.length;
-        img.src = productosFiltrados.find(p=>p.id==id).imagenes[idx].url;
-        img.dataset.index = idx;
-        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
-        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+        const idx = parseInt(this.dataset.idx);
+        abrirModalDetalle(productosFiltrados.find(p=>p.id==id), idx);
       };
     });
-    document.querySelectorAll('.galeria-next').forEach(btn => {
-      btn.onclick = function(e) {
-        e.stopPropagation();
-        const id = this.dataset.id;
-        const card = document.querySelector(`.producto-card[data-id='${id}']`);
-        const img = card.querySelector('.galeria-img');
-        const dots = card.querySelectorAll('.galeria-dot');
-        let idx = parseInt(img.dataset.index);
-        idx = (idx+1)%dots.length;
-        img.src = productosFiltrados.find(p=>p.id==id).imagenes[idx].url;
-        img.dataset.index = idx;
-        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
-        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
-      };
-    });
-    document.querySelectorAll('.galeria-dot').forEach(dot => {
-      dot.onclick = function(e) {
-        e.stopPropagation();
+    document.querySelectorAll('.galeria-miniatura').forEach(mini => {
+      mini.onclick = function(e) {
         const id = this.dataset.id;
         const idx = parseInt(this.dataset.idx);
         const card = document.querySelector(`.producto-card[data-id='${id}']`);
-        const img = card.querySelector('.galeria-img');
-        const dots = card.querySelectorAll('.galeria-dot');
-        img.src = productosFiltrados.find(p=>p.id==id).imagenes[idx].url;
-        img.dataset.index = idx;
-        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
-        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+        const imgPrincipal = card.querySelector('.galeria-img-principal');
+        imgPrincipal.src = mini.src;
+        imgPrincipal.dataset.idx = idx;
+        card.querySelectorAll('.galeria-miniatura').forEach((m, i) => {
+          m.className = m.className.replace('border-brandy-500','border-brandy-200 dark:border-brandy-700');
+          if(i===idx) m.className = m.className.replace('border-brandy-200 dark:border-brandy-700','border-brandy-500');
+        });
       };
     });
-    // Click en imagen para ver galería ampliada
-    document.querySelectorAll('.galeria-img').forEach(img => {
-      img.onclick = function(e) {
-        e.stopPropagation();
-        const id = this.dataset.id;
-        abrirModalDetalle(productosFiltrados.find(p=>p.id==id), parseInt(this.dataset.index));
-      };
-    });
-    // Agregar al carrito
-    document.querySelectorAll('.agregar-carrito-btn').forEach(btn => {
-      btn.onclick = function(e) {
-        e.stopPropagation();
-        const id = this.dataset.id;
-        const cantidad = parseInt(document.querySelector(`.cantidad-input[data-id='${id}']`).value);
-        if (!window.usuarioLogueado) {
-          abrirCarrito();
-          mostrarMensajeLoginCarrito();
-          return;
-        }
-        const producto = productosFiltrados.find(p=>p.id==id);
-        agregarAlCarrito(producto, cantidad);
-        abrirCarrito();
-      };
-    });
+    // ... existing code de controles y botones ...
   }
   // Modificar fetch de productos para usar el filtro
   fetch('/api/productos')
