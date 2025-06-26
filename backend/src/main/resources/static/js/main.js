@@ -221,10 +221,24 @@ if (window.location.pathname.endsWith('catalogo.html')) {
   const finalizarCompra = document.getElementById('finalizar-compra');
 
   // Mostrar modal detalle
-  function abrirModalDetalle(producto) {
+  function abrirModalDetalle(producto, imagenInicial = 0) {
+    const imagenes = (producto.imagenes && producto.imagenes.length > 0) ? producto.imagenes : [{url:'img/no-image.png'}];
+    let galeria = `<div class='relative w-60 h-60 mx-auto group'>
+      <img src='${imagenes[imagenInicial].url}' alt='${producto.nombre}' class='h-60 w-60 object-cover rounded-xl shadow galeria-img-modal' data-index='${imagenInicial}'>`;
+    if(imagenes.length > 1) {
+      galeria += `<button class='absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-prev-modal hidden group-hover:block'>&lt;</button>
+      <button class='absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-next-modal hidden group-hover:block'>&gt;</button>`;
+    }
+    galeria += `<div class='flex gap-1 justify-center mt-2'>`;
+    imagenes.forEach((img, idx) => {
+      galeria += `<button class='w-3 h-3 rounded-full border-2 ${idx===imagenInicial?'bg-brandy-500 border-brandy-700':'bg-white border-brandy-300'} galeria-dot-modal' data-idx='${idx}'></button>`;
+    });
+    galeria += `</div></div>`;
     modalContent.innerHTML = `
       <div class="flex flex-col md:flex-row gap-8 items-center">
-        <img src="${(producto.imagenes && producto.imagenes.length > 0) ? producto.imagenes[0].url : 'img/no-image.png'}" alt="${producto.nombre}" class="h-60 w-60 object-cover rounded-xl shadow mb-4 md:mb-0">
+        <div class='flex flex-col items-center'>
+          ${galeria}
+        </div>
         <div class="flex-1 flex flex-col gap-2">
           <h2 class="text-3xl font-bold text-brandy-700 dark:text-brandy-100 mb-2">${producto.nombre}</h2>
           <p class="text-brandy-600 dark:text-brandy-200 mb-2">${producto.descripcion}</p>
@@ -244,11 +258,59 @@ if (window.location.pathname.endsWith('catalogo.html')) {
     modal.classList.remove('hidden');
     setTimeout(() => modal.classList.add('backdrop-blur-sm'), 10);
     document.body.classList.add('overflow-hidden');
+    // Galería de imágenes en modal
+    const img = modalContent.querySelector('.galeria-img-modal');
+    const dots = modalContent.querySelectorAll('.galeria-dot-modal');
+    if(imagenes.length > 1) {
+      modalContent.querySelector('.galeria-prev-modal').onclick = function(e) {
+        e.stopPropagation();
+        let idx = parseInt(img.dataset.index);
+        idx = (idx-1+imagenes.length)%imagenes.length;
+        img.src = imagenes[idx].url;
+        img.dataset.index = idx;
+        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
+        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+      };
+      modalContent.querySelector('.galeria-next-modal').onclick = function(e) {
+        e.stopPropagation();
+        let idx = parseInt(img.dataset.index);
+        idx = (idx+1)%imagenes.length;
+        img.src = imagenes[idx].url;
+        img.dataset.index = idx;
+        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
+        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+      };
+    }
+    dots.forEach((dot, idx) => {
+      dot.onclick = function(e) {
+        e.stopPropagation();
+        img.src = imagenes[idx].url;
+        img.dataset.index = idx;
+        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
+        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+      };
+    });
+    // Click en imagen para ver ampliada
+    img.onclick = function(e) {
+      e.stopPropagation();
+      const url = img.src;
+      const visor = document.createElement('div');
+      visor.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90';
+      visor.innerHTML = `<img src='${url}' class='max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl'><button class='absolute top-4 right-4 text-4xl text-white'>&times;</button>`;
+      visor.querySelector('button').onclick = () => visor.remove();
+      visor.onclick = (ev) => { if(ev.target===visor) visor.remove(); };
+      document.body.appendChild(visor);
+    };
     document.getElementById('cantidad-detalle').addEventListener('input', function() {
       if (this.value < 1) this.value = 1;
       if (this.value > producto.stock) this.value = producto.stock;
     });
     document.getElementById('agregar-carrito-detalle').onclick = () => {
+      if (!window.usuarioLogueado) {
+        abrirCarrito();
+        mostrarMensajeLoginCarrito();
+        return;
+      }
       agregarAlCarrito(producto, parseInt(document.getElementById('cantidad-detalle').value));
       cerrarModalDetalle();
       abrirCarrito();
@@ -417,17 +479,105 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       return;
     }
     productosContainer.innerHTML = productosFiltrados.map(p => {
-      const img = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].url : 'img/no-image.png';
+      const imagenes = (p.imagenes && p.imagenes.length > 0) ? p.imagenes : [{url:'img/no-image.png'}];
+      // Galería de imágenes con flechas si hay varias
+      let galeria = `<div class='relative w-40 h-40 mx-auto group'>
+        <img src='${imagenes[0].url}' alt='${p.nombre}' class='h-40 w-40 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700 galeria-img' data-index='0' data-id='${p.id}'>`;
+      if(imagenes.length > 1) {
+        galeria += `<button class='absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-prev hidden group-hover:block' data-id='${p.id}'>&lt;</button>
+        <button class='absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-brandy-900/80 rounded-full p-1 shadow galeria-next hidden group-hover:block' data-id='${p.id}'>&gt;</button>`;
+      }
+      galeria += `<div class='flex gap-1 justify-center mt-2'>`;
+      imagenes.forEach((img, idx) => {
+        galeria += `<button class='w-3 h-3 rounded-full border-2 ${idx===0?'bg-brandy-500 border-brandy-700':'bg-white border-brandy-300'} galeria-dot' data-id='${p.id}' data-idx='${idx}'></button>`;
+      });
+      galeria += `</div></div>`;
+      // Selector de cantidad y botón agregar al carrito
+      let controls = `<div class='flex items-center gap-2 mt-4'>
+        <input type='number' min='1' max='${p.stock}' value='1' class='w-16 p-2 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500 cantidad-input' data-id='${p.id}'>
+        <button class='bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition agregar-carrito-btn' data-id='${p.id}'>Agregar al carrito</button>
+      </div>`;
       return `
-        <div class="producto-card bg-white dark:bg-brandy-800 rounded-lg shadow p-6 flex flex-col items-center cursor-pointer transition hover:scale-105" data-id="${p.id}">
-          <img src="${img}" alt="${p.nombre}" class="h-40 w-40 object-cover rounded mb-4">
-          <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2">${p.nombre}</h2>
-          <p class="text-brandy-600 dark:text-brandy-200 mb-2">${p.descripcion}</p>
-          <span class="text-brandy-500 font-bold text-lg mb-4">${formatoCOP(p.precio)}</span>
-          <button class="bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition ver-detalle" data-id="${p.id}">Ver detalles</button>
+        <div class="producto-card bg-white dark:bg-brandy-800 rounded-lg shadow p-6 flex flex-col items-center transition hover:scale-105 group" data-id="${p.id}">
+          ${galeria}
+          <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2 mt-4 text-center">${p.nombre}</h2>
+          <p class="text-brandy-600 dark:text-brandy-200 mb-2 text-center">${p.descripcion}</p>
+          <span class="text-brandy-500 font-bold text-lg mb-2">${formatoCOP(p.precio)}</span>
+          <span class="text-sm text-brandy-400 dark:text-brandy-300 mb-2">Stock: ${p.stock}</span>
+          ${controls}
+          <button class="bg-brandy-200 text-brandy-700 px-3 py-1 rounded hover:bg-brandy-300 transition ver-detalle mt-2" data-id="${p.id}">Ver detalles</button>
         </div>
       `;
     }).join('');
+    // Eventos de galería
+    document.querySelectorAll('.galeria-prev').forEach(btn => {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        const id = this.dataset.id;
+        const card = document.querySelector(`.producto-card[data-id='${id}']`);
+        const img = card.querySelector('.galeria-img');
+        const dots = card.querySelectorAll('.galeria-dot');
+        let idx = parseInt(img.dataset.index);
+        idx = (idx-1+dots.length)%dots.length;
+        img.src = productosFiltrados.find(p=>p.id==id).imagenes[idx].url;
+        img.dataset.index = idx;
+        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
+        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+      };
+    });
+    document.querySelectorAll('.galeria-next').forEach(btn => {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        const id = this.dataset.id;
+        const card = document.querySelector(`.producto-card[data-id='${id}']`);
+        const img = card.querySelector('.galeria-img');
+        const dots = card.querySelectorAll('.galeria-dot');
+        let idx = parseInt(img.dataset.index);
+        idx = (idx+1)%dots.length;
+        img.src = productosFiltrados.find(p=>p.id==id).imagenes[idx].url;
+        img.dataset.index = idx;
+        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
+        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+      };
+    });
+    document.querySelectorAll('.galeria-dot').forEach(dot => {
+      dot.onclick = function(e) {
+        e.stopPropagation();
+        const id = this.dataset.id;
+        const idx = parseInt(this.dataset.idx);
+        const card = document.querySelector(`.producto-card[data-id='${id}']`);
+        const img = card.querySelector('.galeria-img');
+        const dots = card.querySelectorAll('.galeria-dot');
+        img.src = productosFiltrados.find(p=>p.id==id).imagenes[idx].url;
+        img.dataset.index = idx;
+        dots.forEach((d,i)=>d.className = d.className.replace('bg-brandy-500 border-brandy-700','bg-white border-brandy-300'));
+        dots[idx].className = dots[idx].className.replace('bg-white border-brandy-300','bg-brandy-500 border-brandy-700');
+      };
+    });
+    // Click en imagen para ver galería ampliada
+    document.querySelectorAll('.galeria-img').forEach(img => {
+      img.onclick = function(e) {
+        e.stopPropagation();
+        const id = this.dataset.id;
+        abrirModalDetalle(productosFiltrados.find(p=>p.id==id), parseInt(this.dataset.index));
+      };
+    });
+    // Agregar al carrito
+    document.querySelectorAll('.agregar-carrito-btn').forEach(btn => {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        const id = this.dataset.id;
+        const cantidad = parseInt(document.querySelector(`.cantidad-input[data-id='${id}']`).value);
+        if (!window.usuarioLogueado) {
+          abrirCarrito();
+          mostrarMensajeLoginCarrito();
+          return;
+        }
+        const producto = productosFiltrados.find(p=>p.id==id);
+        agregarAlCarrito(producto, cantidad);
+        abrirCarrito();
+      };
+    });
   }
   // Modificar fetch de productos para usar el filtro
   fetch('/api/productos')
@@ -1091,9 +1241,25 @@ if (window.location.pathname.endsWith('admin.html')) {
   function renderProductoCard(p) {
     const img = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].url : 'img/no-image.png';
     const cats = window._categoriasAdmin || [];
-    
+    // Galería de imágenes actuales con botón de eliminar
+    let galeria = '';
+    if (p.imagenes && p.imagenes.length > 0) {
+      galeria = `<div class='flex flex-wrap gap-2 mb-2'>`;
+      p.imagenes.forEach(im => {
+        galeria += `<div class='relative group'>
+          <img src='${im.url}' class='h-16 w-16 object-cover rounded border border-brandy-200 dark:border-brandy-700'>
+          <button type='button' class='absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs opacity-80 hover:opacity-100 transition eliminar-img-admin' data-url='${im.url}' title='Eliminar'>&times;</button>
+        </div>`;
+      });
+      galeria += `</div>`;
+    }
+    // ... existing code ...
+    // Agregar input para nuevas imágenes
     return `
       <div class="bg-white dark:bg-brandy-900 rounded-lg shadow p-6 flex flex-col gap-2 relative group transition-transform hover:scale-105 duration-200" id="prod-${p.id}">
+        ${galeria}
+        <input type="file" class="input-nuevas-imagenes mb-2" data-id="${p.id}" multiple accept="image/*">
+        <div class="preview-nuevas-imagenes flex flex-wrap gap-2 mb-2" data-id="${p.id}"></div>
         <img src="${img}" alt="${p.nombre}" class="h-32 w-32 object-cover rounded mb-2 mx-auto border border-brandy-200 dark:border-brandy-700">
         <div class="flex flex-col gap-1 mb-2">
           <label class="text-xs text-brandy-500 dark:text-brandy-300 font-semibold" for="nombre-${p.id}">Nombre</label>
@@ -1138,99 +1304,63 @@ if (window.location.pathname.endsWith('admin.html')) {
   function asignarEventosProducto(id) {
     const card = document.getElementById(`prod-${id}`);
     if (!card) return;
-    
-    // Guardar cambios
+    // ... existing code ...
+    // Lógica para eliminar imágenes actuales (marcar para borrar)
+    let imagenesAEliminar = [];
+    card.querySelectorAll('.eliminar-img-admin').forEach(btn => {
+      btn.onclick = function() {
+        const url = this.dataset.url;
+        imagenesAEliminar.push(url);
+        this.parentElement.remove();
+      };
+    });
+    // Lógica para previsualizar nuevas imágenes
+    let nuevasImagenes = [];
+    const inputNuevas = card.querySelector('.input-nuevas-imagenes');
+    const previewNuevas = card.querySelector('.preview-nuevas-imagenes');
+    inputNuevas.onchange = function(e) {
+      nuevasImagenes = [...e.target.files];
+      previewNuevas.innerHTML = '';
+      nuevasImagenes.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const div = document.createElement('div');
+          div.className = 'relative group';
+          div.innerHTML = `<img src='${ev.target.result}' class='h-16 w-16 object-cover rounded border border-brandy-200 dark:border-brandy-700'><button type='button' class='absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs opacity-80 hover:opacity-100 transition eliminar-nueva-img-admin' data-idx='${idx}' title='Eliminar'>&times;</button>`;
+          previewNuevas.appendChild(div);
+          div.querySelector('button').onclick = () => {
+            nuevasImagenes.splice(idx, 1);
+            div.remove();
+          };
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+    // Guardar cambios (enviar nuevas imágenes y las URLs a eliminar)
     card.querySelector('[data-accion="guardar"]').onclick = async () => {
       const feedback = card.querySelector(`#feedback-${id}`);
       feedback.textContent = 'Guardando...';
       feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
-      
-      const nombre = card.querySelector('[data-field="nombre"]').value;
-      const descripcion = card.querySelector('[data-field="descripcion"]').value;
-      const precio = parseFloat(card.querySelector('[data-field="precio"]').value);
-      const stock = parseInt(card.querySelector('[data-field="stock"]').value);
-      const materiales = card.querySelector('[data-field="materiales"]').value;
-      const categoriaId = card.querySelector('[data-field="categoria"]').value;
-      
+      // ... existing code para obtener datos ...
       try {
         const formData = new FormData();
         formData.append('producto', JSON.stringify({ nombre, descripcion, precio, stock, materiales }));
         formData.append('categoriaId', categoriaId);
+        nuevasImagenes.forEach(img => formData.append('imagenes', img));
+        imagenesAEliminar.forEach(url => formData.append('imagenesAEliminar', url));
         const res = await fetch(`${API_URL}/admin/productos/${id}`, {
           method: 'PUT',
           headers: { 'Authorization': 'Bearer ' + jwt },
           body: formData
         });
-        if (res.status === 409) throw new Error('Ya existe un producto con ese nombre');
-        if (!res.ok) throw new Error('Error al guardar');
-        feedback.textContent = '✔️';
-        feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
-        setTimeout(async () => {
-          await cargarProductos();
-          if (vistaTablaContainer && !vistaTablaContainer.classList.contains('hidden')) {
-            await cargarProductosTabla();
-          }
-        }, 1200);
+        // ... existing code ...
       } catch (err) {
-        feedback.textContent = err.message || 'Error';
-        feedback.className = 'text-red-600 dark:text-red-400';
+        // ... existing code ...
       }
     };
-    
-    // Eliminar producto
-    card.querySelector('[data-accion="eliminar"]').onclick = async () => {
-      if (!confirm('¿Eliminar este producto?')) return;
-      const feedback = card.querySelector(`#feedback-${id}`);
-      feedback.textContent = 'Eliminando...';
-      feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
-      try {
-        const res = await fetch(`${API_URL}/admin/productos/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + jwt }
-        });
-        
-        if (!res.ok) throw new Error('Error al eliminar');
-        
-        feedback.textContent = 'Eliminado';
-        feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
-        setTimeout(async () => {
-          await cargarProductos();
-          if (vistaTablaContainer && !vistaTablaContainer.classList.contains('hidden')) {
-            await cargarProductosTabla();
-          }
-        }, 800);
-      } catch (err) {
-        feedback.textContent = 'Error';
-        feedback.className = 'text-red-600 dark:text-red-400';
-      }
-    };
-    
-    // Activar/desactivar
-    card.querySelector('[data-accion="toggle-activo"]').onclick = async () => {
-      const feedback = card.querySelector(`#feedback-${id}`);
-      feedback.textContent = 'Actualizando...';
-      feedback.className = 'text-brandy-700 dark:text-brandy-200 animate-pulse';
-      try {
-        const activo = !card.querySelector('[data-accion="toggle-activo"]').classList.contains('bg-brandy-600');
-        const res = await fetch(`${API_URL}/admin/productos/${id}/estado?activo=${activo}`, {
-          method: 'PATCH',
-          headers: { 'Authorization': 'Bearer ' + jwt }
-        });
-        if (!res.ok) throw new Error('Error al actualizar');
-        feedback.textContent = '✔️';
-        feedback.className = 'text-green-600 dark:text-green-400 animate-bounce';
-        setTimeout(async () => {
-          await cargarProductos();
-          if (vistaTablaContainer && !vistaTablaContainer.classList.contains('hidden')) {
-            await cargarProductosTabla();
-          }
-        }, 1200);
-      } catch (err) {
-        feedback.textContent = 'Error';
-        feedback.className = 'text-red-600 dark:text-red-400';
-      }
-    };
+    // ... existing code ...
   }
+  // ... existing code ...
 
   // --- 5. Gestión de categorías ---
   const categoriaForm = document.getElementById('categoria-form');
@@ -1611,3 +1741,49 @@ window.addEventListener('DOMContentLoaded', cargarUsuarioYCarrito);
 function formatoCOP(valor) {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
 }
+
+// Mensaje en carrito si no hay sesión
+function mostrarMensajeLoginCarrito() {
+  const carritoItems = document.getElementById('carrito-items');
+  if (!carritoItems) return;
+  carritoItems.innerHTML = `<div class='text-center text-brandy-700 dark:text-brandy-100 p-6'>
+    Para poder agregar productos al carrito debes <b id='ir-login' class='cursor-pointer underline'>iniciar sesión</b> o <b id='ir-registro' class='cursor-pointer underline'>registrarte</b>.
+  </div>`;
+  document.getElementById('ir-login').onclick = () => { window.location.href = 'cuenta.html'; };
+  document.getElementById('ir-registro').onclick = () => { window.location.href = 'cuenta.html#register'; };
+}
+
+window.usuarioLogueado = false;
+document.addEventListener('DOMContentLoaded', function () {
+  // ... existing code ...
+  if (!jwt) {
+    window.usuarioLogueado = false;
+    // ... existing code ...
+    return;
+  }
+  fetch('/api/auth/me', {
+    headers: { 'Authorization': 'Bearer ' + jwt }
+  })
+    .then(res => {
+      if (!res.ok) {
+        window.usuarioLogueado = false;
+        // ... existing code ...
+        return null;
+      }
+      return res.json();
+    })
+    .then(user => {
+      if (!user || !user.roles) {
+        window.usuarioLogueado = false;
+        // ... existing code ...
+        return;
+      }
+      window.usuarioLogueado = true;
+      // ... existing code ...
+    })
+    .catch(err => {
+      window.usuarioLogueado = false;
+      // ... existing code ...
+    });
+});
+// ... existing code ...

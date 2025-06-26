@@ -88,21 +88,20 @@ public class ProductoController {
             @PathVariable Long id,
             @RequestParam("producto") String productoJson,
             @RequestParam("categoriaId") Long categoriaId,
-            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes
+            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes,
+            @RequestParam(value = "imagenesAEliminar", required = false) List<String> imagenesAEliminar
     ) throws IOException {
         System.out.println("=== EDITAR PRODUCTO ===");
         System.out.println("ID: " + id);
         System.out.println("Producto JSON: " + productoJson);
         System.out.println("Categoría ID: " + categoriaId);
         System.out.println("Imágenes: " + (imagenes != null ? imagenes.size() : "null"));
-        
+        System.out.println("Imágenes a eliminar: " + (imagenesAEliminar != null ? imagenesAEliminar : "null"));
         ObjectMapper mapper = new ObjectMapper();
         Producto producto = mapper.readValue(productoJson, Producto.class);
         System.out.println("Producto parseado: " + producto.getNombre());
-        
-        Producto editado = productoService.editarProducto(id, producto, categoriaId, imagenes);
+        Producto editado = productoService.editarProducto(id, producto, categoriaId, imagenes, imagenesAEliminar);
         System.out.println("Producto editado con categoría: " + (editado.getCategoria() != null ? editado.getCategoria().getNombre() : "null"));
-        
         return ResponseEntity.ok(editado);
     }
 

@@ -75,20 +75,17 @@ public class ProductoService {
     }
 
     @Transactional
-    public Producto editarProducto(Long id, Producto datos, Long categoriaId, List<MultipartFile> nuevasImagenes) throws IOException {
+    public Producto editarProducto(Long id, Producto datos, Long categoriaId, List<MultipartFile> nuevasImagenes, List<String> imagenesAEliminar) throws IOException {
         System.out.println("=== SERVICIO: EDITAR PRODUCTO ===");
         System.out.println("ID del producto: " + id);
         System.out.println("Categoría ID recibido: " + categoriaId);
-        
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
         System.out.println("Producto encontrado: " + producto.getNombre());
         System.out.println("Categoría actual: " + (producto.getCategoria() != null ? producto.getCategoria().getNombre() : "null"));
-        
         Categoria categoria = categoriaRepository.findById(categoriaId)
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
         System.out.println("Nueva categoría encontrada: " + categoria.getNombre() + " (ID: " + categoria.getId() + ")");
-        
         producto.setNombre(datos.getNombre());
         producto.setPrecio(datos.getPrecio());
         producto.setDescripcion(datos.getDescripcion());
@@ -96,10 +93,17 @@ public class ProductoService {
         producto.setStock(datos.getStock());
         producto.setCategoria(categoria);
         producto.setActivo(datos.getActivo());
-        
+        // Eliminar imágenes marcadas
+        if (imagenesAEliminar != null && !imagenesAEliminar.isEmpty()) {
+            List<ImagenProducto> imagenesActuales = imagenProductoRepository.findByProductoId(id);
+            for (ImagenProducto img : imagenesActuales) {
+                if (imagenesAEliminar.contains(img.getUrl())) {
+                    s3Service.deleteFile(img.getUrl());
+                    imagenProductoRepository.delete(img);
+                }
+            }
+        }
         Producto guardado = productoRepository.save(producto);
-        System.out.println("Producto actualizado con categoría: " + (guardado.getCategoria() != null ? guardado.getCategoria().getNombre() : "null"));
-        
         if (nuevasImagenes == null) {
             nuevasImagenes = new ArrayList<>();
         }
