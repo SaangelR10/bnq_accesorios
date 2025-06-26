@@ -1880,3 +1880,17 @@ function migrarCarritoAlIniciarSesion(userId) {
     localStorage.removeItem('carrito');
   }
 }
+
+// ... existing code ...
+// Cerrar menú móvil al hacer clic fuera
+if (mobileMenu) {
+  document.addEventListener('mousedown', function(e) {
+    const isMenuOpen = !mobileMenu.classList.contains('hidden');
+    const isClickInsideMenu = mobileMenu.contains(e.target);
+    const isClickOnToggle = menuToggle && menuToggle.contains(e.target);
+    if (isMenuOpen && !isClickInsideMenu && !isClickOnToggle) {
+      mobileMenu.classList.add('hidden');
+    }
+  });
+}
+// ... existing code ...
