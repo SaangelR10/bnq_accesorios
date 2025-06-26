@@ -50,7 +50,6 @@ public class S3Service {
         PutObjectRequest putReq = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
-                .acl("public-read")
                 .contentType(file.getContentType())
                 .build();
         s3Client.putObject(putReq, software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
