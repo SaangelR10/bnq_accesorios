@@ -1936,4 +1936,23 @@ video {
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6, .dark .titulo, .dark .text-principal, .dark .text-secundario, .dark .modal-titulo, .dark .modal-mensaje, .dark .card-titulo, .dark .card-texto, .dark .form-label, .dark .form-input, .dark .form-msg, .dark .btn, .dark .btn-primary, .dark .btn-danger, .dark .btn-success, .dark .text-center, .dark .text-left, .dark .text-right {
+  color: #fff !important;
+}
+.dark .bg-brandy-900, .dark .bg-brandy-800, .dark .bg-brandy-700, .dark .bg-brandy-600 {
+  background-color: #2d1a10 !important;
+}
+.dark .bg-white, .dark .bg-brandy-50, .dark .bg-brandy-100, .dark .bg-brandy-200 {
+  background-color: #3a2416 !important;
+}
+.dark .border-brandy-200, .dark .border-brandy-100, .dark .border-brandy-300 {
+  border-color: #a8743b !important;
+}
+.dark .text-brandy-700, .dark .text-brandy-600, .dark .text-brandy-500, .dark .text-brandy-400, .dark .text-brandy-300, .dark .text-brandy-200 {
+  color: #ffe6c7 !important;
+}
+.dark .text-brandy-100 {
+  color: #fffbe6 !important;
 } 

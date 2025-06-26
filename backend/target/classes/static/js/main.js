@@ -9,11 +9,23 @@ if (menuToggle && mobileMenu) {
 
 // Dark mode
 const darkToggle = document.getElementById('dark-toggle');
+const darkToggleMobile = document.getElementById('dark-toggle-mobile');
 const html = document.documentElement;
 if (darkToggle) {
   darkToggle.addEventListener('click', () => {
     html.classList.toggle('dark');
     // Guardar preferencia en localStorage
+    if (html.classList.contains('dark')) {
+      localStorage.setItem('theme', 'dark');
+    } else {
+      localStorage.setItem('theme', 'light');
+    }
+  });
+}
+// Soporte para botón móvil
+if (darkToggleMobile) {
+  darkToggleMobile.addEventListener('click', () => {
+    html.classList.toggle('dark');
     if (html.classList.contains('dark')) {
       localStorage.setItem('theme', 'dark');
     } else {
