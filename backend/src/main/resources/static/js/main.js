@@ -476,28 +476,34 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       productosMsg.textContent = 'No hay productos disponibles en esta categoría.';
       return;
     }
-    productosContainer.innerHTML = productosFiltrados.map(p => {
+    productosContainer.innerHTML = productosFiltrados.map((p, idx) => {
       const imagenes = (p.imagenes && p.imagenes.length > 0) ? p.imagenes : [{url:'img/no-image.png'}];
       let galeria = `<div class='flex flex-col items-center w-full mb-2'>
-        <img src='${imagenes[0].url}' alt='${p.nombre}' class='h-40 w-40 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700 galeria-img-principal cursor-pointer' data-id='${p.id}' data-idx='0'>
+        <img src='${imagenes[0].url}' alt='${p.nombre}' class='h-40 w-40 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700 galeria-img-principal cursor-pointer transition-transform duration-300 hover:scale-105' data-id='${p.id}' data-idx='0'>
         <div class='flex gap-1 justify-center mt-2 galeria-miniaturas' data-id='${p.id}'>`;
       imagenes.forEach((img, idx) => {
-        galeria += `<img src='${img.url}' class='h-10 w-10 object-cover rounded border-2 ${idx===0?'border-brandy-500':'border-brandy-200 dark:border-brandy-700'} galeria-miniatura cursor-pointer' data-id='${p.id}' data-idx='${idx}'>`;
+        galeria += `<img src='${img.url}' class='h-10 w-10 object-cover rounded border-2 ${idx===0?'border-brandy-500':'border-brandy-200 dark:border-brandy-700'} galeria-miniatura cursor-pointer transition-transform duration-200 hover:scale-110' data-id='${p.id}' data-idx='${idx}'>`;
       });
       galeria += `</div></div>`;
       let controls = `<div class='flex items-center gap-2 mt-2 justify-center'>
         <input type='number' min='1' max='${p.stock}' value='1' class='w-16 p-2 rounded border border-brandy-200 dark:border-brandy-700 bg-brandy-50 dark:bg-brandy-900 focus:outline-none focus:ring-2 focus:ring-brandy-500 cantidad-input' data-id='${p.id}'>
-        <button class='bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 transition agregar-carrito-btn' data-id='${p.id}'>Agregar al carrito</button>
+        <button class='bg-brandy-500 text-white px-4 py-2 rounded hover:bg-brandy-600 hover:scale-105 active:scale-95 transition-all agregar-carrito-btn relative group' data-id='${p.id}'>
+          Agregar al carrito
+          <span class='absolute left-1/2 -bottom-8 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none bg-brandy-700 text-white text-xs rounded px-2 py-1 transition-all duration-300 z-50 whitespace-nowrap'>Añadir este producto</span>
+        </button>
       </div>`;
       return `
-        <div class="producto-card bg-white dark:bg-brandy-800 rounded-lg shadow p-6 flex flex-col items-center transition hover:scale-105 group w-full max-w-xs mx-auto mb-6" data-id="${p.id}">
+        <div class="producto-card bg-white dark:bg-brandy-800 rounded-lg shadow p-6 flex flex-col items-center transition hover:scale-105 group w-full max-w-xs mx-auto mb-6 animate-fade-in" data-id="${p.id}" style="animation-delay:${idx*80}ms">
           ${galeria}
           <h2 class="text-xl font-semibold text-brandy-700 dark:text-brandy-100 mb-2 mt-2 text-center">${p.nombre}</h2>
           <p class="text-brandy-600 dark:text-brandy-200 mb-2 text-center">${p.descripcion}</p>
           <span class="text-brandy-500 font-bold text-lg mb-1">${formatoCOP(p.precio)}</span>
           <span class="text-sm text-brandy-400 dark:text-brandy-300 mb-2">Stock: ${p.stock}</span>
           ${controls}
-          <button class="bg-brandy-200 text-brandy-700 px-3 py-1 rounded hover:bg-brandy-300 transition ver-detalle mt-2 w-full" data-id="${p.id}">Ver detalles</button>
+          <button class="bg-brandy-200 text-brandy-700 px-3 py-1 rounded hover:bg-brandy-300 hover:scale-105 active:scale-95 transition-all ver-detalle mt-2 w-full relative group" data-id="${p.id}">
+            Ver detalles
+            <span class='absolute left-1/2 -bottom-8 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none bg-brandy-700 text-white text-xs rounded px-2 py-1 transition-all duration-300 z-50 whitespace-nowrap'>Ver más información</span>
+          </button>
         </div>
       `;
     }).join('');
