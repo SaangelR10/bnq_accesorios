@@ -481,8 +481,8 @@ if (window.location.pathname.endsWith('catalogo.html')) {
       let galeria = `<div class='flex flex-col items-center w-full mb-2'>
         <img src='${imagenes[0].url}' alt='${p.nombre}' class='h-40 w-40 object-cover rounded shadow border border-brandy-200 dark:border-brandy-700 galeria-img-principal cursor-pointer transition-transform duration-300 hover:scale-105' data-id='${p.id}' data-idx='0'>
         <div class='flex gap-1 justify-center mt-2 galeria-miniaturas' data-id='${p.id}'>`;
-      imagenes.forEach((img, idx) => {
-        galeria += `<img src='${img.url}' class='h-10 w-10 object-cover rounded border-2 ${idx===0?'border-brandy-500':'border-brandy-200 dark:border-brandy-700'} galeria-miniatura cursor-pointer transition-transform duration-200 hover:scale-110' data-id='${p.id}' data-idx='${idx}'>`;
+      imagenes.forEach((img, idx2) => {
+        galeria += `<img src='${img.url}' class='h-10 w-10 object-cover rounded border-2 ${(idx2===0?'border-brandy-500':'border-brandy-200 dark:border-brandy-700')} galeria-miniatura cursor-pointer transition-transform duration-200 hover:scale-110' data-id='${p.id}' data-idx='${idx2}'>`;
       });
       galeria += `</div></div>`;
       let controls = `<div class='flex items-center gap-2 mt-2 justify-center'>
@@ -529,7 +529,6 @@ if (window.location.pathname.endsWith('catalogo.html')) {
         });
       };
     });
-    // ... existing code de controles y botones ...
   }
   // Modificar fetch de productos para usar el filtro
   fetch('/api/productos')
