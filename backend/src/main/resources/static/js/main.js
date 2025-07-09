@@ -679,6 +679,9 @@ if (window.location.pathname.endsWith('admin.html')) {
   const limpiarBtn = document.getElementById('limpiar-form');
   const msgDiv = document.getElementById('producto-form-msg');
   const categoriaSelect = document.getElementById('categoria');
+  if (!categoriaSelect) {
+    console.error('No se encontró el elemento <select id="categoria"> en el DOM. Verifica el HTML de admin.html.');
+  }
   const adminProductosContainer = document.getElementById('admin-productos-container');
   const adminProductosMsg = document.getElementById('admin-productos-msg');
   const archivoMasivo = document.getElementById('archivo-masivo');
@@ -1160,6 +1163,10 @@ if (window.location.pathname.endsWith('admin.html')) {
 
   // --- 4. Cargar categorías y productos existentes ---
   async function cargarCategorias() {
+    if (!categoriaSelect) {
+      console.error('No se puede poblar el select de categorías porque no existe en el DOM.');
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/categorias`);
       if (!res.ok) throw new Error('Error al cargar categorías');
